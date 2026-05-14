@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    line-height: 1.6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+#root {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.content {
+    text-align: left;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #000;
+}
+
+p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #4b5563;
+}
+
+.payment-info {
+    font-weight: 600;
+    color: #000;
+    margin: 24px 0;
+    font-size: 18px;
+}
+
+.btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px 24px;
+    background-color: #000000;
+    color: #ffffff;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #262626;
+}
+
+.code-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.code-input {
+    width: 45px;
+    height: 55px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    outline: none;
+}
+
+.code-input:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+}
+
+.footer {
+    margin-top: 40px;
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+table {
+    font-size: 14px;
+}
