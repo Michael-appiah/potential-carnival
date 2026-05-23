@@ -1,6 +1,4 @@
-const fetch = require('node-fetch'); // In case older Node environment, but let's check if we need it or can use global fetch.
-// Actually, standard Node 18+ has global fetch. To be safe, we can try global fetch first, or fall back.
-
+// Actually, standard Node 18+ has global fetch natively. No node-fetch dependency required.
 exports.handler = async (event, context) => {
     // Enable CORS
     const headers = {
