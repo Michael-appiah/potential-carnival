@@ -17,7 +17,7 @@ const Recharge = () => {
     // States
     const [selectedBrand, setSelectedBrand] = useState(BRANDS[0]);
     const [selectedAmount, setSelectedAmount] = useState(AMOUNTS[1]);
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState('nkwam44@gmail.com');
     const [isLoading, setIsLoading] = useState(false);
     const [loaderStep, setLoaderStep] = useState(0);
     const [showVoucher, setShowVoucher] = useState(false);

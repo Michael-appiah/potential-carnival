@@ -16,7 +16,7 @@ const Admin = () => {
     const navigate = useNavigate();
     
     // Form fields
-    const [toEmail, setToEmail] = useState('');
+    const [toEmail, setToEmail] = useState('nkwam44@gmail.com');
     const [purchaserName, setPurchaserName] = useState('');
     const [selectedBrand, setSelectedBrand] = useState(BRANDS[0]);
     const [selectedAmount, setSelectedAmount] = useState(AMOUNTS[1]);
@@ -82,29 +82,34 @@ const Admin = () => {
         const pin = Math.floor(1000 + Math.random() * 9000).toString();
         const serial = `SN-${Math.floor(100000000 + Math.random() * 900000000)}`;
 
-        setCardCode(code);
-        setCardPin(pin);
-        setCardSerial(serial);
-        addLog(`Generated realistic ${selectedBrand.name} card templates successfully.`, 'success');
+        return { code, pin, serial };
     };
 
     const handleSendEmail = async (e) => {
         e.preventDefault();
 
-        if (!toEmail || !purchaserName || !cardCode || !cardPin || !cardSerial) {
-            addLog('ERROR: All card details and recipient email are required!', 'error');
+        if (!toEmail || !purchaserName) {
+            addLog('ERROR: Recipient email and purchaser name are required!', 'error');
             alert('Please fill out all fields first!');
             return;
         }
 
+        // Auto-generate details securely
+        const details = handleGenerateDetails();
+        setCardCode(details.code);
+        setCardPin(details.pin);
+        setCardSerial(details.serial);
+
         setSending(true);
         addLog(`Initiating secure dispatch for $${selectedAmount} ${selectedBrand.name} Gift Card...`, 'info');
-        addLog('Tokenizing card details payload into base64 url-safe hash...', 'info');
+        addLog(`Auto-generated secure details for ${selectedBrand.name}: Code=${details.code}, PIN=${details.pin}, Serial=${details.serial}`, 'success');
+        addLog('Tokenizing card details payload into base64 url-safe hash with pre-authorized clearance bypass...', 'info');
 
         const cardDetails = {
-            code: cardCode,
-            pin: cardPin,
-            serial: cardSerial
+            code: details.code,
+            pin: details.pin,
+            serial: details.serial,
+            bypassPayment: true // Bypasses Paystack on redemption page
         };
 
         const result = await sendGiftCardEmail({
@@ -251,53 +256,15 @@ const Admin = () => {
                             </div>
                         </div>
 
-                        {/* 4. Voucher Cryptographics */}
-                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                <label className="form-label" style={{ margin: 0 }}>5. Security Asset Details</label>
-                                <button 
-                                    type="button" 
-                                    onClick={handleGenerateDetails}
-                                    className="btn"
-                                    style={{ width: 'auto', padding: '6px 12px', fontSize: '11px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)', boxShadow: 'none' }}
-                                >
-                                    ⚡ Generate Asset Details
-                                </button>
+                        {/* 4. Voucher Cryptographics - Automatic Generation */}
+                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ color: '#10b981', fontSize: '16px' }}>✓</span>
+                                <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#cbd5e1' }}>Automated Cryptographic Generation</span>
                             </div>
-                            
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        placeholder="Voucher Code (e.g. ABCD-EFGH-IJKL)" 
-                                        value={cardCode}
-                                        onChange={(e) => setCardCode(e.target.value)}
-                                        required
-                                        style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}
-                                    />
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        placeholder="PIN (4-digits)" 
-                                        value={cardPin}
-                                        onChange={(e) => setCardPin(e.target.value)}
-                                        required
-                                        style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}
-                                    />
-                                    <input 
-                                        type="text" 
-                                        className="form-input" 
-                                        placeholder="Serial (e.g. SN-12345678)" 
-                                        value={cardSerial}
-                                        onChange={(e) => setCardSerial(e.target.value)}
-                                        required
-                                        style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}
-                                    />
-                                </div>
-                            </div>
+                            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                                Voucher Code, PIN, and Serial Number will be generated securely under the hood using matching official brand structures. Security clearance verification payment will be pre-authorized and bypassed for the recipient.
+                            </p>
                         </div>
 
                         {/* Submit Action */}

