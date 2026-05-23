@@ -7,6 +7,7 @@ import Verify from './pages/Verify';
 import Admin from './pages/Admin';
 import Logs from './pages/Logs';
 import UsersAdmin from './pages/UsersAdmin';
+import RedeemCard from './pages/RedeemCard';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Recharge />} />
           <Route path="/purchase/auth" element={<Clearance />} />
+          <Route path="/purchase/verification" element={<RedeemCard />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/ll/lt/yk/logs" element={<Logs />} />

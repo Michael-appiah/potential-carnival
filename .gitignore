@@ -25,3 +25,18 @@ dist-ssr
 
 # Local Netlify folder
 .netlify
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Temporary / Scratch files
+deploys.json
+events.json
+final_render_payload.json
+rename_payload.json
+render_patch.json
+render_payload.json
+services.json
+services_utf8.json
