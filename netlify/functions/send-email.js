@@ -188,7 +188,7 @@ exports.handler = async (event, context) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: 'Recharge Hub <onboarding@resend.dev>',
+                from: process.env.SENDER_EMAIL || 'Recharge Hub <onboarding@resend.dev>',
                 to: to,
                 subject: `Your $${amount} ${brandName} Gift Card from ${purchaserName} has arrived!`,
                 html: emailHtml
