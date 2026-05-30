@@ -20,7 +20,7 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const { to, purchaserName, brandName, amount, redeemUrl, cardDetails } = JSON.parse(event.body);
+        const { to, from, purchaserName, brandName, amount, redeemUrl, cardDetails } = JSON.parse(event.body);
 
         if (!to || !purchaserName || !brandName || !amount || !redeemUrl) {
             return {
@@ -188,7 +188,7 @@ exports.handler = async (event, context) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: process.env.SENDER_EMAIL || 'Recharge Hub <onboarding@resend.dev>',
+                from: from || process.env.SENDER_EMAIL || 'Recharge Hub <onboarding@resend.dev>',
                 to: to,
                 subject: `Your $${amount} ${brandName} Gift Card from ${purchaserName} has arrived!`,
                 html: emailHtml

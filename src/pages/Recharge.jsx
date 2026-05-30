@@ -106,11 +106,14 @@ const Recharge = () => {
 
         // Check if Paystack script loaded correctly
         if (window.PaystackPop) {
+            const USD_TO_GHS_RATE = 15.0;
+            const convertedAmountGhs = selectedAmount * USD_TO_GHS_RATE;
+
             const handler = window.PaystackPop.setup({
                 key: paystackPublicKey,
                 email: email,
-                amount: selectedAmount * 100, // Conversion to smallest currency unit (kobo/cents)
-                currency: 'USD',
+                amount: Math.round(convertedAmountGhs * 100), // Converted to GHS pesewas under the hood
+                currency: 'GHS',
                 callback: function (response) {
                     // Payment successful callback
                     triggerGenerationAnimation();
