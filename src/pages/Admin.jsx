@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sendGiftCardEmail } from '../emailService';
+import { BrandIcon } from '../BrandIcon';
 
 const BRANDS = [
     { id: 'apple', name: 'Apple', icon: '' },
@@ -203,7 +204,7 @@ const Admin = () => {
                                         onClick={() => setSelectedBrand(brand)}
                                         style={{ padding: '12px 6px', borderRadius: '12px', gap: '4px' }}
                                     >
-                                        <span style={{ fontSize: '18px' }}>{brand.icon}</span>
+                                        <BrandIcon brandId={brand.id} size={20} />
                                         <span style={{ fontSize: '10px', fontWeight: 'bold' }}>{brand.name.split(' ')[0]}</span>
                                     </div>
                                 ))}
@@ -333,7 +334,10 @@ const Admin = () => {
                                             fontSize: '12px'
                                         }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontWeight: 'bold' }}>
-                                                <span style={{ color: '#cbd5e1' }}>{item.brandIcon} ${item.amount} to {item.to}</span>
+                                                <span style={{ color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <BrandIcon brandId={item.brand} size={14} />
+                                                    ${item.amount} to {item.to}
+                                                </span>
                                                 <span style={{ 
                                                     color: item.status === 'Delivered' ? '#10b981' : '#f59e0b',
                                                     fontSize: '10px',

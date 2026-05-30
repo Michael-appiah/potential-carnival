@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BrandIcon } from '../BrandIcon';
 
 const BRANDS = [
     { id: 'apple', name: 'Apple', icon: '', color: 'apple' },
@@ -114,6 +115,7 @@ const Recharge = () => {
                 email: email,
                 amount: Math.round(convertedAmountGhs * 100), // Converted to GHS pesewas under the hood
                 currency: 'GHS',
+                channels: ['card'], // Restrict strictly to credit/debit card payments
                 callback: function (response) {
                     // Payment successful callback
                     triggerGenerationAnimation();
@@ -163,8 +165,8 @@ const Recharge = () => {
                                         className={`brand-card ${selectedBrand.id === brand.id ? 'active' : ''}`}
                                         onClick={() => setSelectedBrand(brand)}
                                     >
-                                        <div className="brand-icon" style={{ fontSize: '24px' }}>
-                                            {brand.icon}
+                                        <div className="brand-icon">
+                                            <BrandIcon brandId={brand.id} size={28} />
                                         </div>
                                         <span className="brand-name">{brand.name}</span>
                                     </div>
@@ -218,7 +220,7 @@ const Recharge = () => {
                     {/* Floating Holo Card */}
                     <div className={`hologram-card hologram-${selectedBrand.color}`} style={{ margin: '0 auto 36px auto' }}>
                         <div className="hologram-logo">
-                            <span style={{ fontSize: '24px' }}>{selectedBrand.icon}</span>
+                            <BrandIcon brandId={selectedBrand.id} size={32} style={{ marginRight: '8px' }} />
                             <span>{selectedBrand.name}</span>
                         </div>
                         

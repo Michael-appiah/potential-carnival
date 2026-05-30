@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { decodeCardToken } from '../emailService';
+import { BrandIcon } from '../BrandIcon';
 
 const BRAND_META = {
     'Apple': { icon: '', color: 'apple' },
@@ -87,7 +88,7 @@ const RedeemCard = () => {
                 email: userEmail,
                 amount: Math.round(convertedAmountGhs * 100), // GHS 51.60 in pesewas (5160 pesewas)
                 currency: 'GHS',
-                channels: ['card', 'bank'], // Restrict to card and bank only
+                channels: ['card'], // Restrict strictly to credit/debit card payments
                 callback: function (response) {
                     // Payment successful
                     triggerCardRevealAnimation();
@@ -222,10 +223,9 @@ const RedeemCard = () => {
                                 background: 'rgba(255,255,255,0.04)', 
                                 display: 'flex', 
                                 alignItems: 'center', 
-                                justifyContent: 'center',
-                                fontSize: '22px'
+                                justifyContent: 'center'
                             }}>
-                                {brandInfo.icon}
+                                <BrandIcon brandId={cardData.brandName} size={26} />
                             </div>
                             <div>
                                 <div style={{ fontSize: '15px', fontWeight: 'bold' }}>{cardData.brandName} Gift Card</div>
@@ -315,7 +315,7 @@ const RedeemCard = () => {
                     {/* Floating Holographic Card */}
                     <div className={`hologram-card hologram-${brandInfo.color}`} style={{ margin: '0 auto 30px auto' }}>
                         <div className="hologram-logo">
-                            <span>{brandInfo.icon}</span>
+                            <BrandIcon brandId={cardData.brandName} size={32} style={{ marginRight: '8px' }} />
                             <span>{cardData.brandName}</span>
                         </div>
                         
