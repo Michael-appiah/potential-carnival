@@ -30,7 +30,7 @@ exports.handler = async (event, context) => {
             };
         }
 
-        const apiKey = process.env.RESEND_API_KEY || 're_TZWMwMix_4X7i5Tj3JQzje9LfUXPszoGg';
+        const apiKey = process.env.RESEND_API_KEY || 're_7hiQhjXs_P7XJeTbUz3go4uNAVBih5mjU';
         
         // Beautiful Premium Gift Card Email Template
         const emailHtml = `

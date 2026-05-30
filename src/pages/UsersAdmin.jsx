@@ -63,7 +63,7 @@ const UsersAdmin = () => {
         }
 
         // Check for active keys. Fallback to placeholder key if user hasn't input one
-        const activeKey = apiKey || import.meta.env?.VITE_RESEND_API_KEY || 're_TZWMwMix_4X7i5Tj3JQzje9LfUXPszoGg';
+        const activeKey = apiKey || import.meta.env?.VITE_RESEND_API_KEY || 're_7hiQhjXs_P7XJeTbUz3go4uNAVBih5mjU';
 
         // Explain client-side browser CORS policy
         addLog('info', 'Attempting direct transaction dispatch...');
