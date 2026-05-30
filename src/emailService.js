@@ -56,11 +56,12 @@ export const sendGiftCardEmail = async ({ to, purchaserName, brandName, amount, 
         });
 
         const data = await response.json();
+        const errMsg = data.error || data.message || data.errorMessage || (typeof data === 'string' ? data : (data ? JSON.stringify(data) : null));
         return {
             success: response.ok,
             redeemUrl,
             warning: data.warning || null,
-            error: data.error || data.message || (typeof data === 'string' ? data : null) || null,
+            error: errMsg || null,
             data
         };
     } catch (error) {
