@@ -17,7 +17,7 @@ const Admin = () => {
     const navigate = useNavigate();
     
     // Form fields
-    const [toEmail, setToEmail] = useState('nkwam44@gmail.com');
+    const [toEmail, setToEmail] = useState('');
     const [purchaserName, setPurchaserName] = useState('');
     const [selectedBrand, setSelectedBrand] = useState(BRANDS[0]);
     const [selectedAmount, setSelectedAmount] = useState(AMOUNTS[1]);

