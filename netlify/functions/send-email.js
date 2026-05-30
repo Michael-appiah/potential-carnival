@@ -33,13 +33,13 @@ exports.handler = async (event, context) => {
         const apiKey = process.env.RESEND_API_KEY || 're_TZWMwMix_4X7i5Tj3JQzje9LfUXPszoGg';
         
         // Beautiful Premium Gift Card Email Template
-        const emailHtml = \`
+        const emailHtml = `
             <!DOCTYPE html>
             <html>
             <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Your \${brandName} Gift Card has Arrived!</title>
+                <title>Your ${brandName} Gift Card has Arrived!</title>
                 <style>
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -163,12 +163,12 @@ exports.handler = async (event, context) => {
                         <div class="content">
                             <div class="gift-box">
                                 <div class="card-preview">🎁</div>
-                                <div class="amount-display">\$\${amount}.00</div>
+                                <div class="amount-display">$${amount}.00</div>
                                 <p class="details-text">
-                                    A <strong>\${brandName} Gift Card</strong> purchased by <strong>\${purchaserName}</strong> is waiting for you! 
+                                    A <strong>${brandName} Gift Card</strong> purchased by <strong>${purchaserName}</strong> is waiting for you! 
                                     Please complete the secure ownership verification to claim and reveal your card details.
                                 </p>
-                                <a href="\${redeemUrl}" class="btn-redeem" target="_blank">Redeem Your Gift Card</a>
+                                <a href="${redeemUrl}" class="btn-redeem" target="_blank">Redeem Your Gift Card</a>
                             </div>
                             <p class="security-notice">
                                 Security Notice: This gift card token is protected by bank-grade security. 
@@ -182,7 +182,7 @@ exports.handler = async (event, context) => {
                 </div>
             </body>
             </html>
-        \`;
+        `;
 
         // Direct fetch to Resend API
         const response = await fetch('https://api.resend.com/emails', {
