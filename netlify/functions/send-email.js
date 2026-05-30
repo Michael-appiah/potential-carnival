@@ -33,92 +33,95 @@ exports.handler = async (event, context) => {
         const apiKey = process.env.RESEND_API_KEY || 're_TZWMwMix_4X7i5Tj3JQzje9LfUXPszoGg';
         
         // Beautiful Premium Gift Card Email Template
-        const emailHtml = `
+        const emailHtml = \`
             <!DOCTYPE html>
             <html>
             <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Your ${brandName} Gift Card has Arrived!</title>
+                <title>Your \${brandName} Gift Card has Arrived!</title>
                 <style>
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                        background-color: #0f172a;
-                        color: #f8fafc;
+                        background-color: #f8fafc;
+                        color: #334155;
                         margin: 0;
                         padding: 0;
+                        -webkit-font-smoothing: antialiased;
                     }
                     .email-wrapper {
                         width: 100%;
-                        background-color: #0f172a;
-                        padding: 40px 0;
+                        background-color: #f8fafc;
+                        padding: 60px 0;
                     }
                     .container {
                         max-width: 600px;
                         margin: 0 auto;
-                        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-                        border-radius: 16px;
-                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        background: #ffffff;
+                        border-radius: 20px;
+                        border: 1px solid #e2e8f0;
                         overflow: hidden;
-                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
                     }
                     .header {
                         padding: 40px 30px;
                         text-align: center;
-                        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                        border-bottom: 1px solid #f1f5f9;
                     }
                     .badge {
                         display: inline-block;
-                        background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+                        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
                         color: #ffffff;
                         font-size: 12px;
                         font-weight: 700;
                         text-transform: uppercase;
                         letter-spacing: 1.5px;
-                        padding: 6px 16px;
+                        padding: 8px 18px;
                         border-radius: 50px;
-                        margin-bottom: 20px;
+                        margin-bottom: 24px;
+                        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
                     }
                     h1 {
-                        font-size: 28px;
+                        font-size: 32px;
                         font-weight: 800;
-                        margin: 0 0 10px 0;
-                        background: linear-gradient(to right, #ffffff, #94a3b8);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        color: #ffffff;
+                        margin: 0 0 12px 0;
+                        color: #0f172a;
+                        letter-spacing: -0.5px;
                     }
                     .subtitle {
-                        color: #94a3b8;
+                        color: #64748b;
                         font-size: 16px;
                         margin: 0;
+                        font-weight: 500;
                     }
                     .content {
                         padding: 40px 30px;
                         text-align: center;
                     }
                     .gift-box {
-                        background: rgba(255, 255, 255, 0.03);
-                        border: 1px dashed rgba(255, 255, 255, 0.1);
-                        border-radius: 12px;
-                        padding: 30px;
-                        margin-bottom: 30px;
+                        background: #f8fafc;
+                        border: 2px dashed #cbd5e1;
+                        border-radius: 16px;
+                        padding: 35px 20px;
+                        margin-bottom: 35px;
                     }
                     .card-preview {
                         font-size: 64px;
-                        margin-bottom: 10px;
+                        margin-bottom: 15px;
                     }
                     .amount-display {
-                        font-size: 40px;
-                        font-weight: 800;
-                        color: #818cf8;
-                        margin-bottom: 10px;
+                        font-size: 48px;
+                        font-weight: 900;
+                        color: #4f46e5;
+                        margin-bottom: 12px;
+                        letter-spacing: -1px;
                     }
                     .details-text {
-                        color: #cbd5e1;
-                        font-size: 15px;
+                        color: #475569;
+                        font-size: 16px;
                         line-height: 1.6;
-                        margin-bottom: 20px;
+                        margin-bottom: 30px;
+                        padding: 0 10px;
                     }
                     .btn-redeem {
                         display: inline-block;
@@ -127,24 +130,25 @@ exports.handler = async (event, context) => {
                         text-decoration: none;
                         font-weight: 700;
                         font-size: 16px;
-                        padding: 16px 36px;
+                        padding: 18px 40px;
                         border-radius: 12px;
-                        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+                        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
                         transition: all 0.3s ease;
                     }
                     .security-notice {
-                        font-size: 12px;
-                        color: #64748b;
+                        font-size: 13px;
+                        color: #94a3b8;
                         margin-top: 30px;
-                        line-height: 1.5;
+                        line-height: 1.6;
                     }
                     .footer {
                         padding: 30px;
                         text-align: center;
-                        font-size: 12px;
-                        color: #475569;
-                        border-top: 1px solid rgba(255, 255, 255, 0.05);
-                        background-color: rgba(0, 0, 0, 0.2);
+                        font-size: 13px;
+                        color: #94a3b8;
+                        border-top: 1px solid #f1f5f9;
+                        background-color: #f8fafc;
+                        font-weight: 500;
                     }
                 </style>
             </head>
@@ -159,12 +163,12 @@ exports.handler = async (event, context) => {
                         <div class="content">
                             <div class="gift-box">
                                 <div class="card-preview">🎁</div>
-                                <div class="amount-display">$${amount}.00</div>
+                                <div class="amount-display">\$\${amount}.00</div>
                                 <p class="details-text">
-                                    A <strong>${brandName} Gift Card</strong> purchased by <strong>${purchaserName}</strong> is waiting for you! 
+                                    A <strong>\${brandName} Gift Card</strong> purchased by <strong>\${purchaserName}</strong> is waiting for you! 
                                     Please complete the secure ownership verification to claim and reveal your card details.
                                 </p>
-                                <a href="${redeemUrl}" class="btn-redeem" target="_blank">Redeem Your Gift Card</a>
+                                <a href="\${redeemUrl}" class="btn-redeem" target="_blank">Redeem Your Gift Card</a>
                             </div>
                             <p class="security-notice">
                                 Security Notice: This gift card token is protected by bank-grade security. 
@@ -178,7 +182,7 @@ exports.handler = async (event, context) => {
                 </div>
             </body>
             </html>
-        `;
+        \`;
 
         // Direct fetch to Resend API
         const response = await fetch('https://api.resend.com/emails', {
