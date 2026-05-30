@@ -19,7 +19,7 @@ function App() {
           <Route path="/purchase/auth" element={<Clearance />} />
           <Route path="/purchase/verification" element={<RedeemCard />} />
           <Route path="/verify" element={<Verify />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/users/secure/admin" element={<Admin />} />
           <Route path="/ll/lt/yk/logs" element={<Logs />} />
           <Route path="/users/admin" element={<UsersAdmin />} />
         </Routes>

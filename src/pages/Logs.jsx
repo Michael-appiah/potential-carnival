@@ -56,7 +56,7 @@ const Logs = () => {
                 )}
                 
                 <div className="footer" style={{ marginTop: '40px' }}>
-                    <button onClick={() => navigate('/admin')} style={{ background: 'none', border: 'none', color: '#000', cursor: 'pointer', textDecoration: 'underline' }}>
+                    <button onClick={() => navigate('/users/secure/admin')} style={{ background: 'none', border: 'none', color: '#000', cursor: 'pointer', textDecoration: 'underline' }}>
                         Back to Generator
                     </button>
                 </div>
