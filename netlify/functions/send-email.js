@@ -68,7 +68,7 @@ exports.handler = async (event, context) => {
             iconSlug = 'xbox';
         }
 
-        const brandIcon = `<img src="https://img.icons8.com/${colorHex}/ios-filled/120/${iconSlug}.png" width="64" height="64" alt="${brandName} Logo" style="display: inline-block; vertical-align: middle;" />`;
+        const brandIcon = `<img src="https://img.icons8.com/ios-filled/${colorHex}/${iconSlug}/120.png" width="64" height="64" alt="${brandName} Logo" style="display: inline-block; vertical-align: middle;" />`;
         
         // Beautiful Premium Gift Card Email Template
         const emailHtml = `
