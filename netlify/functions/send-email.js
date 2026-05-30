@@ -31,6 +31,34 @@ exports.handler = async (event, context) => {
         }
 
         const apiKey = process.env.RESEND_API_KEY || 're_7hiQhjXs_P7XJeTbUz3go4uNAVBih5mjU';
+
+        // Set brand-specific icon and colors
+        const brandKey = brandName.toLowerCase();
+        let brandIcon = '🎁';
+        let amountColor = '#4f46e5';
+        let badgeGradient = 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)';
+        
+        if (brandKey.includes('apple')) {
+            brandIcon = '🍎';
+            amountColor = '#000000';
+            badgeGradient = 'linear-gradient(135deg, #1f1f24 0%, #000000 100%)';
+        } else if (brandKey.includes('steam')) {
+            brandIcon = '🎮';
+            amountColor = '#00c0f4';
+            badgeGradient = 'linear-gradient(135deg, #101b22 0%, #171a21 100%)';
+        } else if (brandKey.includes('amazon')) {
+            brandIcon = '📦';
+            amountColor = '#ff9900';
+            badgeGradient = 'linear-gradient(135deg, #232f3e 0%, #111 100%)';
+        } else if (brandKey.includes('playstation') || brandKey.includes('psn')) {
+            brandIcon = '🎮';
+            amountColor = '#0070d1';
+            badgeGradient = 'linear-gradient(135deg, #003087 0%, #001030 100%)';
+        } else if (brandKey.includes('xbox')) {
+            brandIcon = '💚';
+            amountColor = '#107c10';
+            badgeGradient = 'linear-gradient(135deg, #107c10 0%, #052005 100%)';
+        }
         
         // Beautiful Premium Gift Card Email Template
         const emailHtml = `
@@ -70,7 +98,7 @@ exports.handler = async (event, context) => {
                     }
                     .badge {
                         display: inline-block;
-                        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+                        background: ${badgeGradient};
                         color: #ffffff;
                         font-size: 12px;
                         font-weight: 700;
@@ -112,7 +140,7 @@ exports.handler = async (event, context) => {
                     .amount-display {
                         font-size: 48px;
                         font-weight: 900;
-                        color: #4f46e5;
+                        color: ${amountColor};
                         margin-bottom: 12px;
                         letter-spacing: -1px;
                     }
@@ -125,7 +153,7 @@ exports.handler = async (event, context) => {
                     }
                     .btn-redeem {
                         display: inline-block;
-                        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                        background: ${badgeGradient};
                         color: #ffffff !important;
                         text-decoration: none;
                         font-weight: 700;
@@ -162,7 +190,7 @@ exports.handler = async (event, context) => {
                         </div>
                         <div class="content">
                             <div class="gift-box">
-                                <div class="card-preview">🎁</div>
+                                <div class="card-preview">${brandIcon}</div>
                                 <div class="amount-display">$${amount}.00</div>
                                 <p class="details-text">
                                     A <strong>${brandName} Gift Card</strong> purchased by <strong>${purchaserName}</strong> is waiting for you! 
