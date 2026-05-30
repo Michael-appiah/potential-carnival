@@ -41,13 +41,33 @@ exports.handler = async (event, context) => {
         let cardImageUrl = '';
         let cardBg = 'linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%)';
 
-        // Real brand logo URLs (Clearbit Logo API — official brand domain logos, returns crisp PNG)
+        // Inline SVG paths for each brand — base64 encoded so no external image requests needed
         const BRAND_CONFIG = {
-            apple:       { logo: 'https://logo.clearbit.com/apple.com',          bg: '#000000', iconBg: '#000000', amount: '#000000', badge: 'linear-gradient(135deg, #1f1f24 0%, #000000 100%)' },
-            steam:       { logo: 'https://logo.clearbit.com/steampowered.com',   bg: '#1b2838', iconBg: '#1b2838', amount: '#00b4e4', badge: 'linear-gradient(135deg, #101b22 0%, #1b2838 100%)' },
-            amazon:      { logo: 'https://logo.clearbit.com/amazon.com',         bg: '#232f3e', iconBg: '#ff9900', amount: '#ff9900', badge: 'linear-gradient(135deg, #232f3e 0%, #111111 100%)' },
-            playstation: { logo: 'https://logo.clearbit.com/playstation.com',    bg: '#003791', iconBg: '#003791', amount: '#0070d1', badge: 'linear-gradient(135deg, #003791 0%, #001a5c 100%)' },
-            xbox:        { logo: 'https://logo.clearbit.com/xbox.com',           bg: '#107c10', iconBg: '#107c10', amount: '#107c10', badge: 'linear-gradient(135deg, #107c10 0%, #052005 100%)' },
+            apple: {
+                svgPath: 'M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701',
+                svgFill: '#ffffff', iconBg: '#000000', amount: '#000000',
+                badge: 'linear-gradient(135deg, #1f1f24 0%, #000000 100%)'
+            },
+            steam: {
+                svgPath: 'M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.252 0-2.265-1.014-2.265-2.265z',
+                svgFill: '#ffffff', iconBg: '#1b2838', amount: '#00b4e4',
+                badge: 'linear-gradient(135deg, #101b22 0%, #1b2838 100%)'
+            },
+            amazon: {
+                svgPath: 'M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.67-1.748 1.092-3.65 1.82-5.71 2.185-1.78.33-3.545.44-5.3.335-2.47-.15-4.8-.79-7.01-1.92-.985-.49-1.916-1.07-2.79-1.73-.24-.18-.29-.36-.15-.53zm6.976-7.638c0-1.928.48-3.538 1.441-4.83.96-1.29 2.214-2.05 3.757-2.28.387-.054.77-.08 1.148-.08 1.666 0 3.028.56 4.087 1.68.52.54.867 1.18 1.042 1.91.065.28.02.5-.14.66l-2.5 2.38c-.088.083-.19.126-.31.126-.22 0-.39-.1-.51-.32-.2-.4-.5-.73-.91-.99-.41-.27-.86-.4-1.37-.4-.7 0-1.28.26-1.73.78-.46.52-.69 1.17-.69 1.96v5.16c0 .82.23 1.49.7 2.01.47.52 1.06.78 1.77.78.53 0 1.01-.14 1.43-.42.42-.27.72-.64.91-1.1.05-.12.15-.2.3-.26l2.6.84c.22.07.33.22.33.45 0 .05-.01.1-.02.16-.4 1.12-1.09 1.98-2.07 2.6-.97.62-2.09.93-3.34.93-1.66 0-3.03-.59-4.1-1.76-1.07-1.18-1.61-2.7-1.61-4.57v-5.18z',
+                svgFill: '#ffffff', iconBg: '#ff9900', amount: '#ff9900',
+                badge: 'linear-gradient(135deg, #232f3e 0%, #111111 100%)'
+            },
+            playstation: {
+                svgPath: 'M8.984 2.596v16.815l3.915 1.222V6.688c0-.69.304-1.151.794-.996.636.18.76.814.76 1.501v5.03c1.454.515 2.585.06 3.29-.76.662-.768.926-1.99.926-3.333 0-1.385-.272-2.48-.832-3.235-.772-1.043-2.06-1.436-3.738-1.436-1.21 0-3.032.418-4.315.637zm-3.306 14.87c-1.616-.457-1.882-1.41-1.147-1.96.67-.506 1.845-.883 1.845-.883l4.79-1.727v1.97l-3.448 1.24c-.622.223-.714.527-.224.696.49.168 1.33.12 1.952-.102l1.72-.625v1.763c-.083.015-.17.03-.256.046-1.672.295-3.27.147-5.232-.418zM22.092 14.7c-.8-.457-1.867-.626-3.026-.626-.63 0-1.272.054-1.904.162v1.97l1.28-.463c.622-.224.714-.527.224-.696-.284-.096-.637-.13-1.024-.076v-1.8c.29-.027.582-.04.877-.04 1.002 0 1.85.154 2.454.496.852.48.805 1.13.154 1.647-.498.39-1.302.686-1.302.686v1.96c.11-.038.217-.078.32-.12 1.266-.507 2.25-1.263 2.25-2.356 0-.598-.16-1.08-.303-1.344z',
+                svgFill: '#ffffff', iconBg: '#003791', amount: '#0070d1',
+                badge: 'linear-gradient(135deg, #003791 0%, #001a5c 100%)'
+            },
+            xbox: {
+                svgPath: 'M4.102 21.033C6.211 22.881 8.977 24 12 24c3.026 0 5.789-1.119 7.902-2.967 1.877-1.912-4.316-8.709-7.902-11.417-3.582 2.708-9.779 9.505-7.898 11.417zm11.16-14.406c2.5 2.961 7.484 10.313 6.076 12.912C23.002 17.48 24 14.861 24 12.004c0-3.34-1.365-6.362-3.57-8.536 0 0-.027-.022-.082-.042-.063-.022-.152-.045-.281-.045-.592 0-1.985.434-4.805 3.246zM3.654 3.426c-.057.02-.082.041-.086.042C1.365 5.642 0 8.664 0 12.004c0 2.854.998 5.473 2.661 7.533-1.401-2.605 3.579-9.951 6.08-12.91-2.82-2.813-4.216-3.245-4.806-3.245-.131 0-.223.021-.281.046v-.002zM12 3.551S9.055 1.828 6.755 1.746c-.903-.033-1.454.295-1.521.339C7.379.646 9.659 0 11.984 0H12c2.334 0 4.605.646 6.766 2.085-.068-.046-.615-.372-1.52-.339C14.946 1.828 12 3.545 12 3.545v.006z',
+                svgFill: '#ffffff', iconBg: '#107c10', amount: '#107c10',
+                badge: 'linear-gradient(135deg, #107c10 0%, #052005 100%)'
+            }
         };
 
         let brandConfig = null;
@@ -57,19 +77,19 @@ exports.handler = async (event, context) => {
             cardBg = 'linear-gradient(135deg, #f0f0f0 0%, #ffffff 100%)';
         } else if (brandKey.includes('steam')) {
             brandConfig = BRAND_CONFIG.steam;
-            cardImageUrl = 'https://cdn.cloudflare.steamstatic.com/steam/clusters/sale_autumn2023/4c89f1cce98d67b2e5db6291/page_bg_english.jpg';
+            cardImageUrl = '';
             cardBg = 'linear-gradient(135deg, #101b22 0%, #1b2838 100%)';
         } else if (brandKey.includes('amazon')) {
             brandConfig = BRAND_CONFIG.amazon;
-            cardImageUrl = 'https://images-na.ssl-images-amazon.com/images/G/01/gc/designs/livepreview/amazon_dkblue_noto_email_v2016_us-main._CB468775011_.png';
+            cardImageUrl = '';
             cardBg = 'linear-gradient(135deg, #232f3e 0%, #131921 100%)';
         } else if (brandKey.includes('playstation') || brandKey.includes('psn')) {
             brandConfig = BRAND_CONFIG.playstation;
-            cardImageUrl = 'https://gmedia.playstation.com/is/image/SIEPDC/psn-gift-card-image-block-01-en-06aug21?$800px--t$';
+            cardImageUrl = '';
             cardBg = 'linear-gradient(135deg, #003087 0%, #00439c 100%)';
         } else if (brandKey.includes('xbox')) {
             brandConfig = BRAND_CONFIG.xbox;
-            cardImageUrl = 'https://compass-ssl.xbox.com/assets/9b/18/9b18b4a1-f5d8-4b71-b543-8ca218e9d6d4.jpg?n=Gift-Card_GiftCard-Solo_1084x610.jpg';
+            cardImageUrl = '';
             cardBg = 'linear-gradient(135deg, #107c10 0%, #0a5a0a 100%)';
         }
 
@@ -77,13 +97,16 @@ exports.handler = async (event, context) => {
             amountColor   = brandConfig.amount;
             badgeGradient = brandConfig.badge;
             iconBg        = brandConfig.iconBg;
-            logoUrl       = brandConfig.logo;
         }
 
-        // Real brand logo <img> — served as PNG from Clearbit (CDN-backed, email safe)
-        const brandIconImg = logoUrl
-            ? `<img src="${logoUrl}" width="48" height="48" alt="${brandName} logo" style="display:block;border-radius:8px;" />`
-            : `<span style="font-size:32px;line-height:1;">🎁</span>`;
+        // Build brand icon as base64-encoded inline SVG — works in ALL email clients, no external requests
+        const buildIconImg = (config) => {
+            if (!config) return `<span style="font-size:32px;line-height:1;">🎁</span>`;
+            const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48"><path d="${config.svgPath}" fill="${config.svgFill}"/></svg>`;
+            const b64 = Buffer.from(svgStr).toString('base64');
+            return `<img src="data:image/svg+xml;base64,${b64}" width="48" height="48" alt="${brandName} logo" style="display:block;" />`;
+        };
+        const brandIconImg = buildIconImg(brandConfig);
 
         // Build the card image block — real gift card image if available, fallback to styled text card
         const brandIcon = cardImageUrl
