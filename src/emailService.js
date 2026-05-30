@@ -60,7 +60,7 @@ export const sendGiftCardEmail = async ({ to, purchaserName, brandName, amount, 
             success: response.ok,
             redeemUrl,
             warning: data.warning || null,
-            error: data.error || null,
+            error: data.error || data.message || (typeof data === 'string' ? data : null) || null,
             data
         };
     } catch (error) {

