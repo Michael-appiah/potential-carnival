@@ -176,7 +176,7 @@ exports.handler = async (event, context) => {
                             </p>
                         </div>
                         <div class="footer">
-                            &copy; 2026 Recharge Voucher Hub. Secure Digital Asset Delivery.
+                            &copy; 2026 recharge.com. Secure Digital Asset Delivery.
                         </div>
                     </div>
                 </div>

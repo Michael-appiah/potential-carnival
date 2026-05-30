@@ -147,7 +147,7 @@ const Recharge = () => {
             {!showVoucher ? (
                 <div className="content">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <h1>Recharge Voucher Hub</h1>
+                        <h1>recharge.com</h1>
                         <span style={{ fontSize: '12px', background: 'rgba(255,255,255,0.06)', padding: '4px 10px', borderRadius: '12px', color: '#a5b4fc', cursor: 'pointer' }} onClick={() => navigate('/purchase/auth')}>
                             Verification Clearance
                         </span>

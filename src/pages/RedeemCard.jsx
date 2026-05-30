@@ -341,7 +341,7 @@ const RedeemCard = () => {
                             className="btn btn-secondary" 
                             onClick={() => navigate('/')}
                         >
-                            Go to Voucher Hub
+                            Go to recharge.com
                         </button>
                     </div>
                 </div>

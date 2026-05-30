@@ -178,7 +178,7 @@ const Admin = () => {
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button onClick={() => navigate('/')} className="btn btn-secondary" style={{ padding: '8px 16px', width: 'auto', fontSize: '13px' }}>
-                            Voucher Hub
+                            recharge.com
                         </button>
                         <button onClick={() => navigate('/users/admin')} className="btn btn-secondary" style={{ padding: '8px 16px', width: 'auto', fontSize: '13px' }}>
                             User Claims
