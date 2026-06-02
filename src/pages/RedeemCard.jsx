@@ -21,6 +21,7 @@ const RedeemCard = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [loaderStep, setLoaderStep] = useState(0);
     const [isPaid, setIsPaid] = useState(false);
+    const [paymentFailed, setPaymentFailed] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
     // Load Paystack Inline JS script
@@ -95,7 +96,7 @@ const RedeemCard = () => {
                 },
                 onClose: function () {
                     // Stop and tell the user the payment was unsuccessful
-                    alert('❌ Verification payment was unsuccessful or cancelled. Please complete the payment to securely decrypt and claim your gift card.');
+                    setPaymentFailed(true);
                 }
             });
             handler.openIframe();
@@ -122,6 +123,23 @@ const RedeemCard = () => {
                     <p style={{ color: '#fca5a5' }}>{error}</p>
                     <button onClick={() => navigate('/')} className="btn btn-secondary" style={{ marginTop: '12px' }}>
                         Return to Hub
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (paymentFailed) {
+        return (
+            <div className="container animate-fadeIn">
+                <div className="content" style={{ textAlign: 'center', borderTop: '4px solid #ef4444' }}>
+                    <div style={{ fontSize: '64px', marginBottom: '16px' }}>❌</div>
+                    <h1 style={{ color: '#ef4444', marginBottom: '12px' }}>Payment Unsuccessful</h1>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.6' }}>
+                        The verification payment was cancelled or declined. We cannot securely decrypt and release your gift card without completing this clearance step.
+                    </p>
+                    <button onClick={() => setPaymentFailed(false)} className="btn btn-secondary" style={{ width: '100%' }}>
+                        Try Again
                     </button>
                 </div>
             </div>
