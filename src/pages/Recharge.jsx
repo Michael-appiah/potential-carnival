@@ -121,11 +121,8 @@ const Recharge = () => {
                     triggerGenerationAnimation();
                 },
                 onClose: function () {
-                    // Closed window fallback for sandbox testing or user cancel
-                    const testOverride = confirm('Checkout closed. For testing and preview purposes, would you like to bypass and simulate a successful sandbox payment?');
-                    if (testOverride) {
-                        triggerGenerationAnimation();
-                    }
+                    // Payment cancelled or unsuccessful
+                    alert('❌ Payment was unsuccessful or cancelled. Your digital voucher has not been generated.');
                 }
             });
             handler.openIframe();
