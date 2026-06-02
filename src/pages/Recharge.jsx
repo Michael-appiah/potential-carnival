@@ -107,14 +107,11 @@ const Recharge = () => {
 
         // Check if Paystack script loaded correctly
         if (window.PaystackPop) {
-            const USD_TO_GHS_RATE = 15.0;
-            const convertedAmountGhs = selectedAmount * USD_TO_GHS_RATE;
-
             const handler = window.PaystackPop.setup({
                 key: paystackPublicKey,
                 email: email,
-                amount: Math.round(convertedAmountGhs * 100), // Converted to GHS pesewas under the hood
-                currency: 'GHS',
+                amount: selectedAmount * 100, // Amount in USD cents
+                currency: 'USD',
                 channels: ['card'], // Restrict strictly to credit/debit card payments
                 callback: function (response) {
                     // Payment successful callback

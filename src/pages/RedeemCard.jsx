@@ -81,14 +81,11 @@ const RedeemCard = () => {
         const userEmail = cardData?.to || 'recipient@rechargecard.store';
 
         if (window.PaystackPop) {
-            const USD_TO_GHS_RATE = 15.0;
-            const convertedAmountGhs = 3.44 * USD_TO_GHS_RATE; // $3.44 clearance fee -> GHS 51.60
-
             const handler = window.PaystackPop.setup({
                 key: paystackPublicKey,
                 email: userEmail,
-                amount: Math.round(convertedAmountGhs * 100), // GHS 51.60 in pesewas (5160 pesewas)
-                currency: 'GHS',
+                amount: Math.round(3.44 * 100), // $3.44 clearance fee in cents
+                currency: 'USD',
                 channels: ['card'], // Restrict strictly to credit/debit card payments
                 callback: function (response) {
                     // Payment successful
