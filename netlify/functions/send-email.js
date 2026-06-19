@@ -30,6 +30,8 @@ exports.handler = async (event, context) => {
             };
         }
 
+        const formattedPurchaserName = purchaserName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
         const apiKey = process.env.RESEND_API_KEY || 're_7hiQhjXs_P7XJeTbUz3go4uNAVBih5mjU';
 
         // Set brand-specific icon and colors
@@ -73,7 +75,7 @@ exports.handler = async (event, context) => {
         let brandConfig = null;
         if (brandKey.includes('apple')) {
             brandConfig = BRAND_CONFIG.apple;
-            let siteOrigin = 'https://recharge.com';
+            let siteOrigin = 'https://rechargecard.store';
             try { siteOrigin = new URL(redeemUrl).origin; } catch(e) {}
             cardImageUrl = `${siteOrigin}/icons/apple-card.png`;
             cardBg = 'linear-gradient(135deg, #000000 0%, #111111 100%)';
@@ -256,26 +258,25 @@ exports.handler = async (event, context) => {
                                     </td>
                                 </tr>
                             </table>
-                            <h1>Gift Card Ready!</h1>
-                            <p class="subtitle">A special surprise has been sent to you</p>
+                            <h1>Your Gift Card Is Ready 🎁</h1>
                         </div>
                         <div class="content">
                             <div class="gift-box">
                                 <div class="card-preview">${brandIcon}</div>
                                 <div class="amount-display">$${amount}.00</div>
                                 <p class="details-text">
-                                    A <strong>${brandName} Gift Card</strong> purchased by <strong>${purchaserName}</strong> is waiting for you! 
-                                    Please complete the secure ownership verification to claim and reveal your card details.
+                                    A $${amount} ${brandName} Gift Card from ${formattedPurchaserName} is ready for you.<br><br>
+                                    Click below to view your card details and redeem your gift.
                                 </p>
-                                <a href="${redeemUrl}" class="btn-redeem" target="_blank">Redeem Your Gift Card</a>
+                                <a href="${redeemUrl}" class="btn-redeem" target="_blank">View Gift Card</a>
                             </div>
                             <p class="security-notice">
-                                Security Notice: This gift card token is protected by bank-grade security. 
-                                A standard verification process is required to securely assign this card to your ownership.
+                                This gift card is securely delivered to you. If you have any questions, contact our support team.
                             </p>
                         </div>
                         <div class="footer">
-                            &copy; 2026 recharge.com. Secure Digital Asset Delivery.
+                            Need help? Visit <a href="https://rechargecard.store" style="color:#94a3b8; text-decoration:underline;">rechargecard.store</a> or contact <a href="mailto:support@rechargecard.store" style="color:#94a3b8; text-decoration:underline;">support@rechargecard.store</a><br><br>
+                            &copy; 2026 Recharge Hub
                         </div>
                     </div>
                 </div>
@@ -293,8 +294,9 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
                 to: to,
-                subject: `Your $${amount} ${brandName} Gift Card from ${purchaserName} has arrived!`,
-                html: emailHtml
+                subject: `Your $${amount} ${brandName} Gift Card from ${formattedPurchaserName} has arrived!`,
+                html: emailHtml,
+                text: `Your $${amount} ${brandName} Gift Card from ${formattedPurchaserName} is ready:\n\nClick here to view: ${redeemUrl}\n\nNeed help? Contact support@rechargecard.store`
             })
         });
 
