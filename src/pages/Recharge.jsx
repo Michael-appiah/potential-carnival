@@ -26,7 +26,7 @@ const Recharge = () => {
     const [voucherData, setVoucherData] = useState(null);
     const [toastMessage, setToastMessage] = useState('');
 
-    // Load Paystack Inline JS script dynamically and set light theme
+    // Load Paystack Inline JS script dynamically
     useEffect(() => {
         logActivity('A user visited the Main Purchase Page', 'info');
         const script = document.createElement('script');
@@ -34,16 +34,8 @@ const Recharge = () => {
         script.async = true;
         document.body.appendChild(script);
 
-        // Force light theme on this specific page
-        document.body.style.backgroundColor = '#f3f4f6';
-        document.body.style.backgroundImage = 'none';
-        document.body.style.color = '#111827';
-
         return () => {
             document.body.removeChild(script);
-            document.body.style.backgroundColor = '';
-            document.body.style.backgroundImage = '';
-            document.body.style.color = '';
         };
     }, []);
 
@@ -113,10 +105,8 @@ const Recharge = () => {
             return;
         }
 
-        // Use live public key from env or provided fallback public key safely
         const paystackPublicKey = import.meta.env?.VITE_PAYSTACK_PUBLIC_KEY || 'pk_live_3861296b86487f4fc5dabc23e99be12f14e8e88f';
 
-        // Check if Paystack script loaded correctly
         if (window.PaystackPop) {
             logActivity(`User initiated purchase for $${selectedAmount} ${selectedBrand.name} Gift Card. Email: ${email}`, 'info');
             const USD_TO_GHS_RATE = 15.0;
@@ -125,59 +115,49 @@ const Recharge = () => {
             const handler = window.PaystackPop.setup({
                 key: paystackPublicKey,
                 email: email,
-                amount: Math.round(convertedAmountGhs * 100), // Converted to GHS pesewas under the hood
+                amount: Math.round(convertedAmountGhs * 100),
                 currency: 'GHS',
-                channels: ['card'], // Restrict strictly to credit/debit card payments
+                channels: ['card'],
                 callback: function (response) {
-                    // Payment successful callback
                     logActivity(`User successfully paid $${selectedAmount} for a ${selectedBrand.name} gift card!`, 'success');
                     triggerGenerationAnimation();
                 },
                 onClose: function () {
-                    // Payment cancelled or unsuccessful
                     logActivity(`User closed the payment modal without paying for the $${selectedAmount} ${selectedBrand.name} card.`, 'warning');
-                    alert('❌ Payment was unsuccessful or cancelled. Your digital voucher has not been generated.');
+                    alert('❌ Payment was unsuccessful or cancelled.');
                 }
             });
             handler.openIframe();
         } else {
-            // Script failed fallback (simulated flow for local dev)
             triggerGenerationAnimation();
         }
     };
 
-    // Copy code function
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text);
-        setToastMessage('Voucher details copied successfully!');
-        setTimeout(() => setToastMessage(''), 2    const lightContentStyle = {
-        background: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: '16px',
-        padding: '36px',
-        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01)',
-        color: '#1f2937',
-        animation: 'slideUpFade 0.6s ease'
+        setToastMessage('Details copied!');
+        setTimeout(() => setToastMessage(''), 2000);
     };
-
-    const textMuted = { color: '#6b7280' };
 
     return (
         <div className="container">
             {!showVoucher && !isLoading ? (
-                <div style={lightContentStyle}>
+                <div className="content">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none', margin: 0 }}>recharge.com</h1>
-                        <span style={{ fontSize: '12px', background: '#f3f4f6', padding: '6px 12px', borderRadius: '12px', color: '#4b5563', cursor: 'pointer', border: '1px solid #e5e7eb' }} onClick={() => navigate('/purchase/auth')}>
+                        <h1 style={{ margin: 0 }}>recharge.com</h1>
+                        <span 
+                            style={{ fontSize: '12px', background: '#f3f4f6', padding: '6px 12px', borderRadius: '12px', color: '#4b5563', cursor: 'pointer', border: '1px solid #e5e7eb' }} 
+                            onClick={() => navigate('/purchase/auth')}
+                        >
                             Admin Login
                         </span>
                     </div>
-                    <p style={{ color: '#4b5563', fontSize: '15px', marginBottom: '24px' }}>Select a gift card, choose your amount, and enter your email to get your digital card instantly.</p>
+                    <p>Select a gift card, choose your amount, and enter your email to get your digital card instantly.</p>
                     
                     <form onSubmit={handleCheckout}>
                         {/* 1. Brand Selection Grid */}
-                        <div className="form-group" style={{ marginBottom: '24px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', display: 'block' }}>1. Select Brand</label>
+                        <div className="form-group">
+                            <label className="form-label">1. Select Brand</label>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                                 {BRANDS.map((brand) => (
                                     <div 
@@ -212,8 +192,8 @@ const Recharge = () => {
                         </div>
 
                         {/* 2. Amount Selection */}
-                        <div className="form-group" style={{ marginBottom: '24px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', display: 'block' }}>2. Select Amount (USD)</label>
+                        <div className="form-group">
+                            <label className="form-label">2. Select Amount (USD)</label>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                                 {AMOUNTS.map((amount) => (
                                     <div
@@ -238,33 +218,21 @@ const Recharge = () => {
                         </div>
 
                         {/* 3. Recipient Email Input */}
-                        <div className="form-group" style={{ marginBottom: '24px' }}>
-                            <label htmlFor="email-input" style={{ fontSize: '13px', fontWeight: '700', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', display: 'block' }}>3. Your Email Address</label>
+                        <div className="form-group">
+                            <label htmlFor="email-input" className="form-label">3. Your Email Address</label>
                             <input
                                 id="email-input"
                                 type="email"
+                                className="form-input"
                                 placeholder="name@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                style={{
-                                    width: '100%',
-                                    padding: '14px 16px',
-                                    background: '#ffffff',
-                                    border: '2px solid #e5e7eb',
-                                    borderRadius: '10px',
-                                    color: '#111827',
-                                    fontSize: '15px',
-                                    outline: 'none',
-                                    transition: 'border-color 0.2s ease'
-                                }}
-                                onFocus={(e) => e.target.style.borderColor = '#2563eb'}
-                                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                             />
                         </div>
 
                         {/* 4. Action Button */}
-                        <button type="submit" className="btn" style={{ background: '#2563eb', color: '#ffffff', width: '100%', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(37,99,235,0.2)' }}>
+                        <button type="submit" className="btn" style={{ marginTop: '10px' }}>
                             Pay ${selectedAmount}.00
                         </button>
                     </form>
@@ -273,7 +241,7 @@ const Recharge = () => {
 
             {/* Transaction Loader */}
             {isLoading && (
-                <div style={{...lightContentStyle, textAlign: 'center'}}>
+                <div className="content" style={{ textAlign: 'center' }}>
                     <div style={{ 
                         width: '40px', height: '40px', borderRadius: '50%', 
                         border: '3px solid #e5e7eb', borderTopColor: '#2563eb', 
@@ -310,28 +278,28 @@ const Recharge = () => {
 
             {/* Holographic Gift Card Success View */}
             {showVoucher && !isLoading && (
-                <div style={{...lightContentStyle, textAlign: 'center'}} className="animate-fadeIn">
+                <div className="content animate-fadeIn" style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '48px', marginBottom: '10px' }}>✅</div>
-                    <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none', marginBottom: '8px' }}>Purchase Successful!</h1>
-                    <p style={{ marginBottom: '28px', color: '#4b5563', fontSize: '15px' }}>Your gift card is ready. Please save your code.</p>
+                    <h1 style={{ margin: 0, marginBottom: '8px' }}>Purchase Successful!</h1>
+                    <p style={{ marginBottom: '28px' }}>Your gift card is ready. Please save your code.</p>
                     
-                    {/* Floating Holo Card */}
-                    <div className={`hologram-card hologram-${selectedBrand.color}`} style={{ margin: '0 auto 30px auto', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                    {/* Flat clean gift card UI */}
+                    <div className={`hologram-card hologram-${selectedBrand.color}`}>
                         <div className="hologram-logo">
-                            <BrandIcon brandId={selectedBrand.id} size={32} style={{ marginRight: '8px' }} color="#ffffff" />
-                            <span style={{ color: '#ffffff' }}>{selectedBrand.name}</span>
+                            <BrandIcon brandId={selectedBrand.id} size={32} style={{ marginRight: '8px' }} color="#111827" />
+                            <span>{selectedBrand.name}</span>
                         </div>
                         
-                        <div className="hologram-details" style={{ textAlign: 'left', color: '#ffffff' }}>
+                        <div className="hologram-details" style={{ textAlign: 'left' }}>
                             <span style={{ fontSize: '9px', textTransform: 'uppercase', opacity: 0.8, letterSpacing: '1px' }}>Voucher Code</span>
-                            <div className="hologram-code" style={{ textShadow: 'none' }}>{voucherData?.code}</div>
+                            <div className="hologram-code">{voucherData?.code}</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginTop: '6px', opacity: 0.9 }}>
                                 <span>PIN: {voucherData?.pin}</span>
                                 <span>{voucherData?.serial}</span>
                             </div>
                         </div>
                         
-                        <div className="hologram-amount" style={{ color: '#ffffff' }}>
+                        <div className="hologram-amount">
                             ${selectedAmount}.00
                         </div>
                     </div>
@@ -340,14 +308,12 @@ const Recharge = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <button 
                             className="btn" 
-                            style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(37,99,235,0.2)' }}
                             onClick={() => copyToClipboard(`Brand: ${selectedBrand.name}\nCode: ${voucherData?.code}\nPIN: ${voucherData?.pin}\nSerial: ${voucherData?.serial}\nValue: $${selectedAmount}.00`)}
                         >
                             Copy Card Details
                         </button>
                         <button 
-                            className="btn" 
-                            style={{ background: '#f3f4f6', color: '#111827', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}
+                            className="btn btn-secondary" 
                             onClick={() => {
                                 setShowVoucher(false);
                                 setVoucherData(null);
@@ -359,7 +325,7 @@ const Recharge = () => {
                 </div>
             )}
 
-            {toastMessage && <div style={{ position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: '#111827', color: '#fff', padding: '10px 20px', borderRadius: '50px', fontSize: '14px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', animation: 'slideUpFade 0.3s ease', zIndex: 1000 }}>{toastMessage}</div>}
+            {toastMessage && <div className="toast-msg">{toastMessage}</div>}
         </div>
     );
 };

