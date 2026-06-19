@@ -143,14 +143,8 @@ const Recharge = () => {
         <div className="container">
             {!showVoucher && !isLoading ? (
                 <div className="content">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <div style={{ marginBottom: '16px' }}>
                         <h1 style={{ margin: 0 }}>recharge.com</h1>
-                        <span 
-                            style={{ fontSize: '12px', background: '#f3f4f6', padding: '6px 12px', borderRadius: '12px', color: '#4b5563', cursor: 'pointer', border: '1px solid #e5e7eb' }} 
-                            onClick={() => navigate('/purchase/auth')}
-                        >
-                            Admin Login
-                        </span>
                     </div>
                     <p>Select a gift card, choose your amount, and enter your email to get your digital card instantly.</p>
                     
