@@ -32,17 +32,32 @@ const Admin = () => {
     const [logs, setLogs] = useState([]);
     const [sendHistory, setSendHistory] = useState([]);
     const [toastMessage, setToastMessage] = useState('');
+    const [loadingHistory, setLoadingHistory] = useState(true);
 
-    // Load history from localStorage on mount
+    // Load clearance records from server on mount
     useEffect(() => {
-        const stored = localStorage.getItem('money_form_send_history');
-        if (stored) {
+        const loadRecords = async () => {
             try {
-                setSendHistory(JSON.parse(stored));
+                const res = await fetch('/.netlify/functions/list-clearances');
+                const data = await res.json();
+                if (data.records && data.records.length > 0) {
+                    setSendHistory(data.records);
+                } else {
+                    // Fallback to localStorage for legacy data
+                    const stored = localStorage.getItem('money_form_send_history');
+                    if (stored) setSendHistory(JSON.parse(stored));
+                }
             } catch (e) {
-                console.error('Failed to parse history:', e);
+                // Offline / local dev fallback
+                const stored = localStorage.getItem('money_form_send_history');
+                if (stored) {
+                    try { setSendHistory(JSON.parse(stored)); } catch (err) {}
+                }
+            } finally {
+                setLoadingHistory(false);
             }
-        }
+        };
+        loadRecords();
     }, []);
 
     // Live tracking listener
@@ -209,11 +224,20 @@ const Admin = () => {
             const data = await res.json();
             if (data.success) {
                 addLog(`✅ Clearance ${item.clearanceId} cancelled. Emails sent.`, 'success');
-                // Mark as cancelled in local history
-                const updated = sendHistory.map(h =>
-                    h.id === item.id ? { ...h, cancelled: true, status: 'Cancelled' } : h
-                );
-                saveHistory(updated);
+                // Refresh list from server
+                try {
+                    const reloadRes = await fetch('/.netlify/functions/list-clearances');
+                    const reloadData = await reloadRes.json();
+                    if (reloadData.records && reloadData.records.length > 0) {
+                        setSendHistory(reloadData.records);
+                    }
+                } catch (e) {
+                    // fallback local update
+                    const updated = sendHistory.map(h =>
+                        h.id === item.id ? { ...h, cancelled: true, status: 'Cancelled' } : h
+                    );
+                    setSendHistory(updated);
+                }
             } else {
                 addLog(`❌ Failed to cancel: ${data.error}`, 'error');
             }

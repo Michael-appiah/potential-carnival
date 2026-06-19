@@ -65,6 +65,25 @@ export const sendGiftCardEmail = async ({ to, purchaserName, senderEmail, brandN
 
         const data = await response.json();
         const errMsg = data.error || data.message || data.errorMessage || (typeof data === 'string' ? data : (data ? JSON.stringify(data) : null));
+
+        // Persist clearance record to server
+        fetch('/.netlify/functions/save-clearance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                clearanceId,
+                to,
+                senderEmail: senderEmail || '',
+                purchaserName,
+                brandName,
+                amount,
+                redeemUrl,
+                code: cardDetails.code,
+                timestamp: new Date().toISOString(),
+                status: response.ok ? 'Delivered' : 'Failed'
+            })
+        }).catch(() => {}); // fire and forget
+
         return {
             success: response.ok,
             redeemUrl,
