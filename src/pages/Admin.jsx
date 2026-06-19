@@ -462,6 +462,115 @@ const Admin = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Full-width Sent History & Clearance Management */}
+                <div style={{ marginTop: '28px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#111827' }}>
+                                Clearance Management
+                            </h2>
+                            <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#6b7280' }}>
+                                View all sent cards and cancel clearance links
+                            </p>
+                        </div>
+                        {sendHistory.length > 0 && (
+                            <span
+                                onClick={clearHistory}
+                                style={{ fontSize: '12px', color: '#ef4444', cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                                Clear All History
+                            </span>
+                        )}
+                    </div>
+
+                    {sendHistory.length === 0 ? (
+                        <div style={{ 
+                            background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px',
+                            padding: '40px', textAlign: 'center', color: '#9ca3af', fontSize: '14px' 
+                        }}>
+                            No cards sent yet. Send a gift card above to see it here.
+                        </div>
+                    ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px' }}>
+                            {sendHistory.map(item => (
+                                <div key={item.id} style={{
+                                    background: item.cancelled ? '#fef2f2' : '#ffffff',
+                                    border: `1px solid ${item.cancelled ? '#fecaca' : '#e5e7eb'}`,
+                                    borderRadius: '12px',
+                                    padding: '16px'
+                                }}>
+                                    {/* Card Header */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <BrandIcon brandId={item.brand} size={16} color="#111827" />
+                                            <span style={{ fontWeight: '700', fontSize: '14px', color: '#111827' }}>
+                                                {item.brand} — ${item.amount}
+                                            </span>
+                                        </div>
+                                        <span style={{
+                                            fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: '20px',
+                                            color: item.cancelled ? '#dc2626' : (item.status === 'Delivered' ? '#059669' : '#d97706'),
+                                            background: item.cancelled ? '#fee2e2' : (item.status === 'Delivered' ? '#d1fae5' : '#fef3c7')
+                                        }}>
+                                            {item.cancelled ? '⛔ Cancelled' : item.status}
+                                        </span>
+                                    </div>
+
+                                    {/* Details */}
+                                    <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '4px' }}>
+                                        <strong>To:</strong> {item.to}
+                                    </div>
+                                    <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '4px' }}>
+                                        <strong>From:</strong> {item.purchaser}
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '12px', fontFamily: 'monospace' }}>
+                                        {item.clearanceId || 'No ID (legacy card)'}
+                                    </div>
+
+                                    {/* Actions */}
+                                    {item.cancelled ? (
+                                        <div style={{ 
+                                            background: '#fee2e2', border: '1px solid #fecaca', 
+                                            borderRadius: '8px', padding: '10px', 
+                                            fontSize: '13px', color: '#991b1b', fontWeight: '600', textAlign: 'center'
+                                        }}>
+                                            ⛔ Clearance Deactivated
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <a
+                                                href={item.redeemUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    flex: 1, textAlign: 'center', padding: '9px 12px',
+                                                    background: '#eff6ff', color: '#2563eb',
+                                                    borderRadius: '8px', textDecoration: 'none',
+                                                    fontSize: '13px', fontWeight: '600', border: '1px solid #bfdbfe'
+                                                }}
+                                            >
+                                                View Page
+                                            </a>
+                                            <button
+                                                onClick={() => handleCancelClearance(item)}
+                                                style={{
+                                                    flex: 1, padding: '9px 12px',
+                                                    background: '#fff', color: '#dc2626',
+                                                    borderRadius: '8px', fontSize: '13px',
+                                                    fontWeight: '600', border: '1px solid #fca5a5',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Cancel Clearance
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
             {toastMessage && <div className="toast-msg">{toastMessage}</div>}
         </div>
