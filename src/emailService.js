@@ -27,7 +27,7 @@ export const decodeCardToken = (token) => {
     }
 };
 
-export const sendGiftCardEmail = async ({ to, purchaserName, brandName, amount, cardDetails }) => {
+export const sendGiftCardEmail = async ({ to, purchaserName, senderEmail, brandName, amount, cardDetails }) => {
     const token = encodeCardToken({
         ...cardDetails,
         brandName,
@@ -40,6 +40,7 @@ export const sendGiftCardEmail = async ({ to, purchaserName, brandName, amount, 
     const emailPayload = {
         to,
         purchaserName,
+        senderEmail,
         brandName,
         amount,
         redeemUrl,

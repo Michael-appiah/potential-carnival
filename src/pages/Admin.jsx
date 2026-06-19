@@ -20,6 +20,7 @@ const Admin = () => {
     // Form fields
     const [toEmail, setToEmail] = useState('');
     const [purchaserName, setPurchaserName] = useState('');
+    const [senderEmail, setSenderEmail] = useState('');
     const [selectedBrand, setSelectedBrand] = useState(BRANDS[0]);
     const [selectedAmount, setSelectedAmount] = useState(AMOUNTS[1]);
     const [cardCode, setCardCode] = useState('');
@@ -140,6 +141,7 @@ const Admin = () => {
         const result = await sendGiftCardEmail({
             to: toEmail,
             purchaserName,
+            senderEmail,
             brandName: selectedBrand.name,
             amount: selectedAmount,
             cardDetails
@@ -275,7 +277,18 @@ const Admin = () => {
                                 />
                             </div>
                             <div className="form-group">
-                                <label className="form-label" htmlFor="purchaser-name">4. Purchaser Name</label>
+                                <label className="form-label" htmlFor="sender-email">4. Sender Email</label>
+                                <input
+                                    id="sender-email"
+                                    type="email"
+                                    className="form-input"
+                                    placeholder="sender@example.com (optional)"
+                                    value={senderEmail}
+                                    onChange={(e) => setSenderEmail(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label" htmlFor="purchaser-name">5. Purchaser Name</label>
                                 <input
                                     id="purchaser-name"
                                     type="text"
