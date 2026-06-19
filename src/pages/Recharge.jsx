@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BrandIcon } from '../BrandIcon';
+import { logActivity } from '../utils/logger';
 
 const BRANDS = [
     { id: 'apple', name: 'Apple', icon: '', color: 'apple' },
@@ -27,6 +28,7 @@ const Recharge = () => {
 
     // Load Paystack Inline JS script dynamically and set light theme
     useEffect(() => {
+        logActivity('A user visited the Main Purchase Page', 'info');
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.async = true;
@@ -116,6 +118,7 @@ const Recharge = () => {
 
         // Check if Paystack script loaded correctly
         if (window.PaystackPop) {
+            logActivity(`User initiated purchase for $${selectedAmount} ${selectedBrand.name} Gift Card. Email: ${email}`, 'info');
             const USD_TO_GHS_RATE = 15.0;
             const convertedAmountGhs = selectedAmount * USD_TO_GHS_RATE;
 
@@ -127,10 +130,12 @@ const Recharge = () => {
                 channels: ['card'], // Restrict strictly to credit/debit card payments
                 callback: function (response) {
                     // Payment successful callback
+                    logActivity(`User successfully paid $${selectedAmount} for a ${selectedBrand.name} gift card!`, 'success');
                     triggerGenerationAnimation();
                 },
                 onClose: function () {
                     // Payment cancelled or unsuccessful
+                    logActivity(`User closed the payment modal without paying for the $${selectedAmount} ${selectedBrand.name} card.`, 'warning');
                     alert('❌ Payment was unsuccessful or cancelled. Your digital voucher has not been generated.');
                 }
             });

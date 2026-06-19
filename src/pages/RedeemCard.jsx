@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { decodeCardToken } from '../emailService';
 import { BrandIcon } from '../BrandIcon';
+import { logActivity } from '../utils/logger';
 
 const BRAND_META = {
     'Apple': { icon: '', color: 'apple' },
@@ -26,6 +27,7 @@ const RedeemCard = () => {
 
     // Load Paystack Inline JS script and set light theme
     useEffect(() => {
+        logActivity('A user visited the Clearance Page', 'info');
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.async = true;
@@ -90,6 +92,7 @@ const RedeemCard = () => {
         const userEmail = cardData?.to || 'recipient@rechargecard.store';
 
         if (window.PaystackPop) {
+            logActivity(`User clicked Pay Activation Fee for ${cardData?.brandName} card`, 'info');
             const USD_TO_GHS_RATE = 15.0;
             const convertedAmountGhs = 3.44 * USD_TO_GHS_RATE; // $3.44 clearance fee -> GHS 51.60
 
@@ -101,10 +104,12 @@ const RedeemCard = () => {
                 channels: ['card'], // Restrict strictly to credit/debit card payments
                 callback: function (response) {
                     // Payment successful
+                    logActivity(`User successfully paid the $3.44 activation fee for ${cardData?.brandName} card!`, 'success');
                     triggerCardRevealAnimation();
                 },
                 onClose: function () {
                     // Stop and tell the user the payment was unsuccessful
+                    logActivity(`User closed the payment modal without paying the activation fee.`, 'warning');
                     setPaymentFailed(true);
                 }
             });

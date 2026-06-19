@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sendGiftCardEmail } from '../emailService';
 import { BrandIcon } from '../BrandIcon';
+import { logActivity } from '../utils/logger';
 
 const BRANDS = [
     { id: 'apple', name: 'Apple', icon: '' },
@@ -27,9 +28,7 @@ const Admin = () => {
     
     // Status states
     const [sending, setSending] = useState(false);
-    const [logs, setLogs] = useState([
-        { text: 'SYSTEM: Console initialized. Ready for digital asset dispatch.', type: 'info' }
-    ]);
+    const [logs, setLogs] = useState([]);
     const [sendHistory, setSendHistory] = useState([]);
     const [toastMessage, setToastMessage] = useState('');
 
@@ -45,6 +44,34 @@ const Admin = () => {
         }
     }, []);
 
+    // Live tracking listener
+    useEffect(() => {
+        const fetchLogs = () => {
+            const stored = localStorage.getItem('money_form_live_logs');
+            if (stored) {
+                setLogs(JSON.parse(stored));
+            } else {
+                setLogs([{ id: 'init', text: `[${new Date().toLocaleTimeString()}] SYSTEM: Live Tracking initialized. Waiting for user activity...`, type: 'info' }]);
+            }
+        };
+
+        fetchLogs();
+
+        // Listen for updates from other tabs
+        const handleStorage = (e) => {
+            if (e.key === 'money_form_live_logs') fetchLogs();
+        };
+
+        window.addEventListener('storage', handleStorage);
+        // Listen for updates from the same tab
+        window.addEventListener('localLogUpdated', fetchLogs);
+
+        return () => {
+            window.removeEventListener('storage', handleStorage);
+            window.removeEventListener('localLogUpdated', fetchLogs);
+        };
+    }, []);
+
     // Save history helper
     const saveHistory = (newHistory) => {
         setSendHistory(newHistory);
@@ -52,7 +79,7 @@ const Admin = () => {
     };
 
     const addLog = (text, type = 'info') => {
-        setLogs(prev => [...prev, { text: `[${new Date().toLocaleTimeString()}] ${text}`, type }]);
+        logActivity(text, type);
     };
 
     // Helper to generate realistic codes based on brand
@@ -286,8 +313,8 @@ const Admin = () => {
                                 <span style={{ fontSize: '11px', color: '#6b7280', fontFamily: 'var(--font-mono)' }}>RESEND SERVICE PRO</span>
                             </div>
                             <div className="console-box">
-                                {logs.map((log, idx) => (
-                                    <div key={idx} className={`console-line ${log.type}`}>
+                                {logs.map((log) => (
+                                    <div key={log.id || log.text} className={`console-line ${log.type}`}>
                                         {log.text}
                                     </div>
                                 ))}
