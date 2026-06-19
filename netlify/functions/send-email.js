@@ -254,29 +254,30 @@ exports.handler = async (event, context) => {
                                 </tr>
                                 <tr>
                                     <td align="center">
-                                        <span class="badge">${brandName} Gift Card</span>
+                                        <span class="badge">${brandName} Digital Item</span>
                                     </td>
                                 </tr>
                             </table>
-                            <h1>Your Gift Card Is Ready 🎁</h1>
+                            <h1>Digital Delivery Notification</h1>
                         </div>
                         <div class="content">
                             <div class="gift-box">
                                 <div class="card-preview">${brandIcon}</div>
                                 <div class="amount-display">$${amount}.00</div>
                                 <p class="details-text">
-                                    A $${amount} ${brandName} Gift Card from ${formattedPurchaserName} is ready for you.<br><br>
-                                    Click below to view your card details and redeem your gift.
+                                    This is a notification that ${formattedPurchaserName} has sent you a digital item.<br><br>
+                                    You can safely access your delivery details using the link below.
                                 </p>
-                                <a href="${redeemUrl}" class="btn-redeem" target="_blank">View Gift Card</a>
+                                <a href="${redeemUrl}" class="btn-redeem" target="_blank">Access Delivery</a>
                             </div>
                             <p class="security-notice">
-                                This gift card is securely delivered to you. If you have any questions, contact our support team.
+                                This automated notification was sent regarding a digital delivery. If you did not expect this, you can safely ignore this email.
                             </p>
                         </div>
                         <div class="footer">
                             Need help? Visit <a href="https://rechargecard.store" style="color:#94a3b8; text-decoration:underline;">rechargecard.store</a> or contact <a href="mailto:support@rechargecard.store" style="color:#94a3b8; text-decoration:underline;">support@rechargecard.store</a><br><br>
-                            &copy; 2026 Recharge Hub
+                            If you no longer wish to receive these notifications, <a href="mailto:unsubscribe@rechargecard.store" style="color:#94a3b8; text-decoration:underline;">unsubscribe here</a>.<br><br>
+                            &copy; 2026 Recharge Hub, 123 Tech District, NY 10001
                         </div>
                     </div>
                 </div>
@@ -294,9 +295,9 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
                 to: to,
-                subject: `Your $${amount} ${brandName} Gift Card from ${formattedPurchaserName} has arrived!`,
+                subject: `You have received a digital item from ${formattedPurchaserName}`,
                 html: emailHtml,
-                text: `Your $${amount} ${brandName} Gift Card from ${formattedPurchaserName} is ready:\n\nClick here to view: ${redeemUrl}\n\nNeed help? Contact support@rechargecard.store`
+                text: `This is a notification that ${formattedPurchaserName} has sent you a digital item.\n\nYou can access your delivery details here: ${redeemUrl}\n\nIf you did not expect this, you can safely ignore it.\n\nRecharge Hub Support`
             })
         });
 
