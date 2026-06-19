@@ -151,15 +151,18 @@ const Admin = () => {
             id: Date.now().toString(),
             to: toEmail,
             purchaser: purchaserName,
+            senderEmail,
             brand: selectedBrand.name,
             brandIcon: selectedBrand.icon,
             amount: selectedAmount,
-            code: cardCode,
-            pin: cardPin,
-            serial: cardSerial,
+            code: details.code,
+            pin: details.pin,
+            serial: details.serial,
             redeemUrl: result.redeemUrl,
+            clearanceId: result.clearanceId || null,
             timestamp: new Date().toLocaleString(),
-            status: result.success ? 'Delivered' : (result.isLocalFallback ? 'Local Fallback' : 'Resend Failed')
+            status: result.success ? 'Delivered' : (result.isLocalFallback ? 'Local Fallback' : 'Resend Failed'),
+            cancelled: false
         };
 
         const updatedHistory = [newHistoryItem, ...sendHistory];
@@ -180,6 +183,43 @@ const Admin = () => {
         navigator.clipboard.writeText(text);
         setToastMessage('URL copied successfully!');
         setTimeout(() => setToastMessage(''), 2000);
+    };
+
+    const handleCancelClearance = async (item) => {
+        if (!item.clearanceId) {
+            alert('This card was sent before the cancellation feature was added and cannot be cancelled this way.');
+            return;
+        }
+        if (!confirm(`Cancel the clearance for the $${item.amount} ${item.brand} card sent to ${item.to}? Both the recipient and sender will be notified.`)) return;
+
+        try {
+            addLog(`Cancelling clearance ID: ${item.clearanceId}...`, 'info');
+            const res = await fetch('/.netlify/functions/cancel-clearance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    clearanceId: item.clearanceId,
+                    recipientEmail: item.to,
+                    senderEmail: item.senderEmail || '',
+                    purchaserName: item.purchaser,
+                    brandName: item.brand,
+                    amount: item.amount
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                addLog(`✅ Clearance ${item.clearanceId} cancelled. Emails sent.`, 'success');
+                // Mark as cancelled in local history
+                const updated = sendHistory.map(h =>
+                    h.id === item.id ? { ...h, cancelled: true, status: 'Cancelled' } : h
+                );
+                saveHistory(updated);
+            } else {
+                addLog(`❌ Failed to cancel: ${data.error}`, 'error');
+            }
+        } catch (err) {
+            addLog(`❌ Error cancelling clearance: ${err.message}`, 'error');
+        }
     };
 
     const clearHistory = () => {
@@ -356,8 +396,8 @@ const Admin = () => {
                                 ) : (
                                     sendHistory.map(item => (
                                         <div key={item.id} style={{ 
-                                            background: '#ffffff', 
-                                            border: '1px solid #e5e7eb', 
+                                            background: item.cancelled ? '#fef2f2' : '#ffffff', 
+                                            border: `1px solid ${item.cancelled ? '#fecaca' : '#e5e7eb'}`, 
                                             borderRadius: '8px', 
                                             padding: '12px',
                                             fontSize: '12px'
@@ -368,33 +408,52 @@ const Admin = () => {
                                                     ${item.amount} to {item.to}
                                                 </span>
                                                 <span style={{ 
-                                                    color: item.status === 'Delivered' ? '#059669' : '#d97706',
+                                                    color: item.cancelled ? '#dc2626' : (item.status === 'Delivered' ? '#059669' : '#d97706'),
                                                     fontSize: '10px',
-                                                    background: item.status === 'Delivered' ? '#d1fae5' : '#fef3c7',
+                                                    background: item.cancelled ? '#fee2e2' : (item.status === 'Delivered' ? '#d1fae5' : '#fef3c7'),
                                                     padding: '2px 8px',
                                                     borderRadius: '12px'
                                                 }}>
                                                     {item.status}
                                                 </span>
                                             </div>
+                                            <div style={{ color: '#6b7280', fontSize: '10px', marginBottom: '4px', fontFamily: 'monospace' }}>
+                                                ID: {item.clearanceId || 'N/A (legacy)'}
+                                            </div>
                                             <div style={{ color: '#4b5563', fontSize: '11px', marginBottom: '8px' }}>
                                                 Code: {item.code}
                                             </div>
-                                            <div style={{ display: 'flex', gap: '12px' }}>
-                                                <a 
-                                                    href={item.redeemUrl} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 'bold' }}
-                                                >
-                                                    View Page
-                                                </a>
-                                                <span 
-                                                    onClick={() => copyToClipboard(item.redeemUrl)}
-                                                    style={{ color: '#6b7280', cursor: 'pointer', textDecoration: 'underline' }}
-                                                >
-                                                    Copy Link
-                                                </span>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                {!item.cancelled && (
+                                                    <a 
+                                                        href={item.redeemUrl} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 'bold' }}
+                                                    >
+                                                        View Page
+                                                    </a>
+                                                )}
+                                                {!item.cancelled && (
+                                                    <span 
+                                                        onClick={() => copyToClipboard(item.redeemUrl)}
+                                                        style={{ color: '#6b7280', cursor: 'pointer', textDecoration: 'underline' }}
+                                                    >
+                                                        Copy Link
+                                                    </span>
+                                                )}
+                                                {item.cancelled ? (
+                                                    <span style={{ color: '#dc2626', fontWeight: '600', fontSize: '11px' }}>
+                                                        ⛔ Clearance Deactivated
+                                                    </span>
+                                                ) : (
+                                                    <span 
+                                                        onClick={() => handleCancelClearance(item)}
+                                                        style={{ color: '#dc2626', cursor: 'pointer', textDecoration: 'underline', fontSize: '11px', marginLeft: 'auto' }}
+                                                    >
+                                                        Cancel Clearance
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     ))

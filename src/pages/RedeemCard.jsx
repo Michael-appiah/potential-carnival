@@ -24,6 +24,8 @@ const RedeemCard = () => {
     const [isPaid, setIsPaid] = useState(false);
     const [paymentFailed, setPaymentFailed] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [isCancelled, setIsCancelled] = useState(false);
+    const [isCheckingStatus, setIsCheckingStatus] = useState(true);
 
     // Load Paystack Inline JS script
     useEffect(() => {
@@ -38,18 +40,37 @@ const RedeemCard = () => {
         };
     }, []);
 
-    // Decode and validate token on load
+    // Decode token and check if this clearance has been cancelled
     useEffect(() => {
         if (!token) {
-            setError('Verification link is invalid or has expired. Please request a new link from the admin.');
+            setError('Verification link is invalid or has expired.');
+            setIsCheckingStatus(false);
             return;
         }
 
         const decoded = decodeCardToken(token);
         if (!decoded || !decoded.code || !decoded.pin || !decoded.serial) {
             setError('Failed to securely parse gift card details. The security token may be corrupted.');
+            setIsCheckingStatus(false);
+            return;
+        }
+
+        setCardData(decoded);
+
+        // Check if clearance has been cancelled by admin
+        if (decoded.clearanceId) {
+            fetch(`/.netlify/functions/check-clearance?clearanceId=${decoded.clearanceId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.cancelled) {
+                        setIsCancelled(true);
+                        logActivity(`Cancelled clearance link visited: ${decoded.clearanceId}`, 'warning');
+                    }
+                })
+                .catch(() => { /* assume active if check fails */ })
+                .finally(() => setIsCheckingStatus(false));
         } else {
-            setCardData(decoded);
+            setIsCheckingStatus(false);
         }
     }, [token]);
 
@@ -115,6 +136,48 @@ const RedeemCard = () => {
         setTimeout(() => setToastMessage(''), 2000);
     };
 
+    if (isCheckingStatus) {
+        return (
+            <div className="container">
+                <div className="content" style={{ textAlign: 'center' }}>
+                    <div style={{ 
+                        width: '36px', height: '36px', borderRadius: '50%', 
+                        border: '3px solid #e5e7eb', borderTopColor: '#2563eb', 
+                        animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' 
+                    }} />
+                    <p style={{ margin: 0 }}>Verifying your link...</p>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                </div>
+            </div>
+        );
+    }
+
+    if (isCancelled) {
+        return (
+            <div className="container">
+                <div className="content" style={{ textAlign: 'center', borderTop: '4px solid #dc2626' }}>
+                    <div style={{ fontSize: '52px', marginBottom: '16px' }}>⛔</div>
+                    <h1 style={{ color: '#dc2626', marginBottom: '8px' }}>Clearance Cancelled</h1>
+                    <p style={{ marginBottom: '0' }}>
+                        This gift card clearance link has been deactivated by the sender. 
+                        You cannot use this link to access the card anymore.
+                    </p>
+                    <div style={{ 
+                        marginTop: '24px', 
+                        background: '#fef2f2', 
+                        border: '1px solid #fecaca', 
+                        borderRadius: '12px', 
+                        padding: '16px',
+                        fontSize: '14px',
+                        color: '#991b1b'
+                    }}>
+                        If you believe this is an error, please contact the person who sent you this gift card.
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (error) {
         return (
             <div className="container">
@@ -122,6 +185,7 @@ const RedeemCard = () => {
                     <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
                     <h1>Link Expired or Invalid</h1>
                     <p>{error}</p>
+
                     <button onClick={() => navigate('/')} className="btn" style={{ marginTop: '12px' }}>
                         Return Home
                     </button>

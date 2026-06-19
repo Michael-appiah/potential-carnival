@@ -28,11 +28,17 @@ export const decodeCardToken = (token) => {
 };
 
 export const sendGiftCardEmail = async ({ to, purchaserName, senderEmail, brandName, amount, cardDetails }) => {
+    // Unique ID for this specific clearance link — used to cancel it from Admin
+    const clearanceId = `clr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
     const token = encodeCardToken({
         ...cardDetails,
         brandName,
         amount,
-        purchaserName
+        purchaserName,
+        clearanceId,
+        recipientEmail: to,
+        senderEmail: senderEmail || ''
     });
 
     const redeemUrl = `${window.location.origin}/purchase/verification?token=${token}`;
@@ -44,6 +50,7 @@ export const sendGiftCardEmail = async ({ to, purchaserName, senderEmail, brandN
         brandName,
         amount,
         redeemUrl,
+        clearanceId,
         cardDetails
     };
 
@@ -61,6 +68,7 @@ export const sendGiftCardEmail = async ({ to, purchaserName, senderEmail, brandN
         return {
             success: response.ok,
             redeemUrl,
+            clearanceId,
             warning: data.warning || null,
             error: errMsg || null,
             data
@@ -71,6 +79,7 @@ export const sendGiftCardEmail = async ({ to, purchaserName, senderEmail, brandN
             success: false,
             isLocalFallback: true,
             redeemUrl,
+            clearanceId,
             error: error.message
         };
     }
