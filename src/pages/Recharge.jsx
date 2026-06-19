@@ -144,7 +144,7 @@ const Recharge = () => {
             {!showVoucher && !isLoading ? (
                 <div className="content">
                     <div style={{ marginBottom: '16px' }}>
-                        <h1 style={{ margin: 0 }}>recharge.com</h1>
+                        <h1 style={{ margin: 0 }}>Recharge Store</h1>
                     </div>
                     <p>Select a gift card, choose your amount, and enter your email to get your digital card instantly.</p>
                     
