@@ -285,119 +285,128 @@ exports.handler = async (event, context) => {
             </html>
         `;
 
-        // Direct fetch to Resend API
-        const response = await fetch('https://api.resend.com/emails', {
+        // Prepare the recipient email payload
+        const recipientPayload = {
+            from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
+            to: to,
+            subject: `You have received a digital item from ${formattedPurchaserName}`,
+            html: emailHtml,
+            text: `This is a notification that ${formattedPurchaserName} has sent you a digital item.\n\nYou can access your delivery details here: ${redeemUrl}\n\nIf you did not expect this, you can safely ignore it.\n\nRecharge Hub Support`
+        };
+
+        const emailJobs = [];
+
+        // Job 1: Send to Recipient
+        emailJobs.push(fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
-                to: to,
-                subject: `You have received a digital item from ${formattedPurchaserName}`,
-                html: emailHtml,
-                text: `This is a notification that ${formattedPurchaserName} has sent you a digital item.\n\nYou can access your delivery details here: ${redeemUrl}\n\nIf you did not expect this, you can safely ignore it.\n\nRecharge Hub Support`
-            })
-        });
+            body: JSON.stringify(recipientPayload)
+        }).then(res => res.json()));
 
-        const resData = await response.json();
-
-        if (response.ok) {
-            // If sender email was provided, send them a confirmation copy
-            if (senderEmail) {
-                const confirmationHtml = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Purchase Confirmation</title>
-                        <style>
-                            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 0; }
-                            .wrapper { width: 100%; background-color: #f8fafc; padding: 40px 0; }
-                            .container { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; }
-                            .header { padding: 32px 28px; border-bottom: 1px solid #f1f5f9; }
-                            .content { padding: 32px 28px; }
-                            .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-                            .label { color: #64748b; }
-                            .value { font-weight: 600; color: #0f172a; }
-                            .footer { padding: 24px 28px; background: #f8fafc; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="wrapper">
-                            <div class="container">
-                                <div class="header">
-                                    <p style="margin:0 0 4px 0; font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Purchase Confirmation</p>
-                                    <h1 style="margin:0; font-size:24px; font-weight:700; color:#0f172a;">Your gift card was sent!</h1>
-                                </div>
-                                <div class="content">
-                                    <p style="margin:0 0 24px 0; color:#475569; font-size:15px;">
-                                        Hi ${formattedPurchaserName}, your ${brandName} Gift Card has been successfully delivered to <strong>${to}</strong>.
-                                    </p>
-                                    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-                                        <tr style="background:#f8fafc;">
-                                            <td style="padding:12px 16px; font-size:13px; color:#64748b;">Gift Card</td>
-                                            <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">${brandName}</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding:12px 16px; font-size:13px; color:#64748b;">Amount</td>
-                                            <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">$${amount}.00 USD</td>
-                                        </tr>
-                                        <tr style="background:#f8fafc;">
-                                            <td style="padding:12px 16px; font-size:13px; color:#64748b;">Sent To</td>
-                                            <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">${to}</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding:12px 16px; font-size:13px; color:#64748b;">Date</td>
-                                            <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
-                                        </tr>
-                                    </table>
-                                    <p style="margin:24px 0 0 0; font-size:13px; color:#64748b;">Keep this email as your purchase receipt.</p>
-                                </div>
-                                <div class="footer">
-                                    &copy; 2026 Recharge Hub &mdash; <a href="https://rechargecard.store" style="color:#94a3b8;">rechargecard.store</a>
-                                </div>
+        // Job 2: Send receipt to Sender (if provided)
+        if (senderEmail) {
+            const confirmationHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Purchase Confirmation</title>
+                    <style>
+                        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 0; }
+                        .wrapper { width: 100%; background-color: #f8fafc; padding: 40px 0; }
+                        .container { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; }
+                        .header { padding: 32px 28px; border-bottom: 1px solid #f1f5f9; }
+                        .content { padding: 32px 28px; }
+                        .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+                        .label { color: #64748b; }
+                        .value { font-weight: 600; color: #0f172a; }
+                        .footer { padding: 24px 28px; background: #f8fafc; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div class="wrapper">
+                        <div class="container">
+                            <div class="header">
+                                <p style="margin:0 0 4px 0; font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Purchase Confirmation</p>
+                                <h1 style="margin:0; font-size:24px; font-weight:700; color:#0f172a;">Your gift card was sent!</h1>
+                            </div>
+                            <div class="content">
+                                <p style="margin:0 0 24px 0; color:#475569; font-size:15px;">
+                                    Hi ${formattedPurchaserName}, your ${brandName} Gift Card has been successfully delivered to <strong>${to}</strong>.
+                                </p>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+                                    <tr style="background:#f8fafc;">
+                                        <td style="padding:12px 16px; font-size:13px; color:#64748b;">Gift Card</td>
+                                        <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">${brandName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:12px 16px; font-size:13px; color:#64748b;">Amount</td>
+                                        <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">$${amount}.00 USD</td>
+                                    </tr>
+                                    <tr style="background:#f8fafc;">
+                                        <td style="padding:12px 16px; font-size:13px; color:#64748b;">Sent To</td>
+                                        <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">${to}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:12px 16px; font-size:13px; color:#64748b;">Date</td>
+                                        <td style="padding:12px 16px; font-size:13px; font-weight:600; color:#0f172a; text-align:right;">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                                    </tr>
+                                </table>
+                                <p style="margin:24px 0 0 0; font-size:13px; color:#64748b;">Keep this email as your purchase receipt.</p>
+                            </div>
+                            <div class="footer">
+                                &copy; 2026 Recharge Hub &mdash; <a href="https://rechargecard.store" style="color:#94a3b8;">rechargecard.store</a>
                             </div>
                         </div>
-                    </body>
-                    </html>
-                `;
+                    </div>
+                </body>
+                </html>
+            `;
 
-                try {
-                    await fetch('https://api.resend.com/emails', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${apiKey}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
-                            to: senderEmail,
-                            subject: `✅ Your $${amount} ${brandName} Gift Card was sent to ${to}`,
-                            html: confirmationHtml,
-                            text: `Hi ${formattedPurchaserName},\n\nYour $${amount} ${brandName} Gift Card has been successfully delivered to ${to}.\n\nKeep this as your purchase receipt.\n\nRecharge Hub`
-                        })
-                    });
-                } catch (e) {
-                    // Silently ignore if confirmation fails so we still return success for the main email
-                }
-            }
+            emailJobs.push(fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
+                    to: senderEmail,
+                    subject: `✅ Your $${amount} ${brandName} Gift Card was sent to ${to}`,
+                    html: confirmationHtml,
+                    text: `Hi ${formattedPurchaserName},\n\nYour $${amount} ${brandName} Gift Card has been successfully delivered to ${to}.\n\nKeep this as your purchase receipt.\n\nRecharge Hub`
+                })
+            }).then(res => res.json()));
+        }
 
+        // Execute both requests simultaneously
+        const results = await Promise.allSettled(emailJobs);
+        
+        // Extract recipient result (always the first one)
+        const recipientResult = results[0].value || {};
+
+        if (results[0].status === 'fulfilled' && !recipientResult.error) {
             return {
                 statusCode: 200,
                 headers,
-                body: JSON.stringify({ success: true, message: 'Email sent successfully!', data: resData, redeemUrl })
+                body: JSON.stringify({ 
+                    success: true, 
+                    message: 'Email sent successfully!', 
+                    data: recipientResult, 
+                    redeemUrl 
+                })
             };
         } else {
-            // If Resend failed (e.g. wrong email, domain not verified), return error but still provide the link
             return {
-                statusCode: response.status,
+                statusCode: 400,
                 headers,
                 body: JSON.stringify({ 
                     success: false, 
-                    error: resData.message || 'Resend API error', 
+                    error: recipientResult.message || recipientResult.error || 'Resend API error', 
                     redeemUrl,
                     warning: 'Note: Resend free tier accounts can only send emails to the owner address unless you verify your domain.'
                 })
