@@ -365,21 +365,24 @@ exports.handler = async (event, context) => {
                     </html>
                 `;
 
-                // Fire and forget — we don't block on this
-                fetch('https://api.resend.com/emails', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
-                        to: senderEmail,
-                        subject: `✅ Your $${amount} ${brandName} Gift Card was sent to ${to}`,
-                        html: confirmationHtml,
-                        text: `Hi ${formattedPurchaserName},\n\nYour $${amount} ${brandName} Gift Card has been successfully delivered to ${to}.\n\nKeep this as your purchase receipt.\n\nRecharge Hub`
-                    })
-                }).catch(() => {}); // silently ignore if confirmation fails
+                try {
+                    await fetch('https://api.resend.com/emails', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            from: from || process.env.SENDER_EMAIL || 'Recharge Hub <no-reply@rechargecard.store>',
+                            to: senderEmail,
+                            subject: `✅ Your $${amount} ${brandName} Gift Card was sent to ${to}`,
+                            html: confirmationHtml,
+                            text: `Hi ${formattedPurchaserName},\n\nYour $${amount} ${brandName} Gift Card has been successfully delivered to ${to}.\n\nKeep this as your purchase receipt.\n\nRecharge Hub`
+                        })
+                    });
+                } catch (e) {
+                    // Silently ignore if confirmation fails so we still return success for the main email
+                }
             }
 
             return {
