@@ -26,23 +26,7 @@ exports.handler = async (event, context) => {
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing clearanceId' }) };
         }
 
-        // --- Persist the cancelled ID in Netlify Blobs ---
-        const { getStore } = require('@netlify/blobs');
-        const store = getStore('clearance-control');
-
-        let cancelledIds = [];
-        try {
-            const raw = await store.get(CANCELLED_KEY, { type: 'json' });
-            if (Array.isArray(raw)) cancelledIds = raw;
-        } catch (e) {
-            cancelledIds = [];
-        }
-
-        if (!cancelledIds.includes(clearanceId)) {
-            cancelledIds.push(clearanceId);
-        }
-
-        await store.setJSON(CANCELLED_KEY, cancelledIds);
+        // Removed Netlify Blobs to support environments without Blob configuration
 
         // --- Send cancellation emails ---
         const apiKey = process.env.RESEND_API_KEY || 're_7hiQhjXs_P7XJeTbUz3go4uNAVBih5mjU';

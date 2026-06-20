@@ -224,20 +224,12 @@ const Admin = () => {
             const data = await res.json();
             if (data.success) {
                 addLog(`✅ Clearance ${item.clearanceId} cancelled. Emails sent.`, 'success');
-                // Refresh list from server
-                try {
-                    const reloadRes = await fetch('/.netlify/functions/list-clearances');
-                    const reloadData = await reloadRes.json();
-                    if (reloadData.records && reloadData.records.length > 0) {
-                        setSendHistory(reloadData.records);
-                    }
-                } catch (e) {
-                    // fallback local update
-                    const updated = sendHistory.map(h =>
-                        h.id === item.id ? { ...h, cancelled: true, status: 'Cancelled' } : h
-                    );
-                    setSendHistory(updated);
-                }
+                
+                // Immediately update local UI and storage
+                const updated = sendHistory.map(h =>
+                    h.id === item.id ? { ...h, cancelled: true, status: 'Cancelled' } : h
+                );
+                saveHistory(updated);
             } else {
                 addLog(`❌ Failed to cancel: ${data.error}`, 'error');
             }
