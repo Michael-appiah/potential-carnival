@@ -26,9 +26,55 @@ const Recharge = () => {
     const [voucherData, setVoucherData] = useState(null);
     const [toastMessage, setToastMessage] = useState('');
 
-    // Load Paystack Inline JS script dynamically
+    // Load Paystack script dynamically & check for payment reference on callback
     useEffect(() => {
         logActivity('A user visited the Main Purchase Page', 'info');
+        
+        // Handle Paystack callback verification
+        const params = new URLSearchParams(window.location.search);
+        const reference = params.get('reference');
+        
+        if (reference) {
+            const verifyPayment = async () => {
+                setIsLoading(true);
+                setLoaderStep(0);
+                
+                try {
+                    const res = await fetch(`/.netlify/functions/paystack-verify?reference=${reference}`);
+                    const data = await res.json();
+                    
+                    if (data.status === 'success') {
+                        // Retrieve pending details from localStorage
+                        const pendingStr = localStorage.getItem('pending_recharge');
+                        if (pendingStr) {
+                            const pending = JSON.parse(pendingStr);
+                            setSelectedBrand(BRANDS.find(b => b.id === pending.brandId) || BRANDS[0]);
+                            setSelectedAmount(pending.amount);
+                            setEmail(pending.email);
+                            localStorage.removeItem('pending_recharge');
+                        }
+                        
+                        logActivity(`User successfully paid for gift card! Reference: ${reference}`, 'success');
+                        
+                        // Clear reference from URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        triggerGenerationAnimation();
+                    } else {
+                        setIsLoading(false);
+                        alert('❌ Payment verification failed or payment was not completed.');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                } catch (err) {
+                    setIsLoading(false);
+                    alert('❌ An error occurred while verifying the payment.');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            };
+            
+            verifyPayment();
+        }
+
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.async = true;
@@ -96,8 +142,8 @@ const Recharge = () => {
         }, 1800);
     };
 
-    // Initialize Paystack Payment Flow
-    const handleCheckout = (e) => {
+    // Initialize Paystack Payment Flow via Serverless
+    const handleCheckout = async (e) => {
         e.preventDefault();
         
         if (!email) {
@@ -105,31 +151,44 @@ const Recharge = () => {
             return;
         }
 
-        const paystackPublicKey = import.meta.env?.VITE_PAYSTACK_PUBLIC_KEY || 'pk_live_3861296b86487f4fc5dabc23e99be12f14e8e88f';
+        setIsLoading(true);
+        logActivity(`User initiated purchase for $${selectedAmount} ${selectedBrand.name} Gift Card. Email: ${email}`, 'info');
+        
+        try {
+            // Save pending details to restore on redirect
+            localStorage.setItem('pending_recharge', JSON.stringify({
+                brandId: selectedBrand.id,
+                amount: selectedAmount,
+                email: email
+            }));
 
-        if (window.PaystackPop) {
-            logActivity(`User initiated purchase for $${selectedAmount} ${selectedBrand.name} Gift Card. Email: ${email}`, 'info');
-            const USD_TO_GHS_RATE = 15.0;
-            const convertedAmountGhs = selectedAmount * USD_TO_GHS_RATE;
-
-            const handler = window.PaystackPop.setup({
-                key: paystackPublicKey,
-                email: email,
-                amount: Math.round(convertedAmountGhs * 100),
-                currency: 'GHS',
-                channels: ['card'],
-                callback: function (response) {
-                    logActivity(`User successfully paid $${selectedAmount} for a ${selectedBrand.name} gift card!`, 'success');
-                    triggerGenerationAnimation();
+            const response = await fetch('/.netlify/functions/paystack-initialize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-                onClose: function () {
-                    logActivity(`User closed the payment modal without paying for the $${selectedAmount} ${selectedBrand.name} card.`, 'warning');
-                    alert('❌ Payment was unsuccessful or cancelled.');
-                }
+                body: JSON.stringify({
+                    email,
+                    amountInUsd: selectedAmount,
+                    callbackUrl: window.location.origin + window.location.pathname,
+                    metadata: {
+                        type: 'recharge',
+                        brandId: selectedBrand.id
+                    }
+                })
             });
-            handler.openIframe();
-        } else {
-            triggerGenerationAnimation();
+
+            const data = await response.json();
+
+            if (data.authorization_url) {
+                window.location.href = data.authorization_url;
+            } else {
+                setIsLoading(false);
+                alert('❌ Failed to initialize payment: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            setIsLoading(false);
+            alert('❌ Failed to connect to secure payment gateway.');
         }
     };
 

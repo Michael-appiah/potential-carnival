@@ -27,18 +27,37 @@ const RedeemCard = () => {
     const [isCancelled, setIsCancelled] = useState(false);
     const [isCheckingStatus, setIsCheckingStatus] = useState(true);
 
-    // Load Paystack Inline JS script
+    // Verify Paystack transaction callback
     useEffect(() => {
-        logActivity('A user visited the Clearance Page', 'info');
-        const script = document.createElement('script');
-        script.src = 'https://js.paystack.co/v1/inline.js';
-        script.async = true;
-        document.body.appendChild(script);
-
-        return () => {
-            document.body.removeChild(script);
-        };
-    }, []);
+        const params = new URLSearchParams(window.location.search);
+        const reference = params.get('reference');
+        if (reference && token) {
+            const verifyPayment = async () => {
+                setIsCheckingStatus(true);
+                try {
+                    const res = await fetch(`/.netlify/functions/paystack-verify?reference=${reference}`);
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        logActivity(`User successfully paid the $3.44 activation fee! Reference: ${reference}`, 'success');
+                        const cleanUrl = window.location.origin + window.location.pathname + '?token=' + encodeURIComponent(token);
+                        window.history.replaceState({}, document.title, cleanUrl);
+                        triggerCardRevealAnimation();
+                    } else {
+                        setPaymentFailed(true);
+                        const cleanUrl = window.location.origin + window.location.pathname + '?token=' + encodeURIComponent(token);
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    }
+                } catch (err) {
+                    alert('❌ An error occurred during payment verification.');
+                    const cleanUrl = window.location.origin + window.location.pathname + '?token=' + encodeURIComponent(token);
+                    window.history.replaceState({}, document.title, cleanUrl);
+                } finally {
+                    setIsCheckingStatus(false);
+                }
+            };
+            verifyPayment();
+        }
+    }, [token]);
 
     // Decode token and check if this clearance has been cancelled
     useEffect(() => {
@@ -99,34 +118,39 @@ const RedeemCard = () => {
         }, 1800);
     };
 
-    // Paystack Payment Trigger
-    const handlePaystackPayment = () => {
-        const paystackPublicKey = import.meta.env?.VITE_PAYSTACK_PUBLIC_KEY || 'pk_live_3861296b86487f4fc5dabc23e99be12f14e8e88f';
+    // Paystack Payment Trigger via Serverless
+    const handlePaystackPayment = async () => {
         const userEmail = cardData?.to || 'recipient@rechargecard.store';
+        setIsCheckingStatus(true);
+        logActivity(`User clicked Pay Activation Fee for ${cardData?.brandName} card`, 'info');
 
-        if (window.PaystackPop) {
-            logActivity(`User clicked Pay Activation Fee for ${cardData?.brandName} card`, 'info');
-            const USD_TO_GHS_RATE = 15.0;
-            const convertedAmountGhs = 3.44 * USD_TO_GHS_RATE; // $3.44 clearance fee -> GHS 51.60
-
-            const handler = window.PaystackPop.setup({
-                key: paystackPublicKey,
-                email: userEmail,
-                amount: Math.round(convertedAmountGhs * 100), // GHS 51.60 in pesewas (5160 pesewas)
-                currency: 'GHS',
-                channels: ['card'],
-                callback: function (response) {
-                    logActivity(`User successfully paid the $3.44 activation fee for ${cardData?.brandName} card!`, 'success');
-                    triggerCardRevealAnimation();
+        try {
+            const response = await fetch('/.netlify/functions/paystack-initialize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-                onClose: function () {
-                    logActivity(`User closed the payment modal without paying the activation fee.`, 'warning');
-                    setPaymentFailed(true);
-                }
+                body: JSON.stringify({
+                    email: userEmail,
+                    amountInUsd: 3.44,
+                    callbackUrl: window.location.origin + window.location.pathname + '?token=' + encodeURIComponent(token),
+                    metadata: {
+                        type: 'clearance_activation'
+                    }
+                })
             });
-            handler.openIframe();
-        } else {
-            alert('❌ Secure Payment Gateway could not be initialized. Please check your network connection and try again.');
+
+            const data = await response.json();
+
+            if (data.authorization_url) {
+                window.location.href = data.authorization_url;
+            } else {
+                setIsCheckingStatus(false);
+                alert('❌ Failed to initialize payment: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            setIsCheckingStatus(false);
+            alert('❌ Failed to connect to secure payment gateway.');
         }
     };
 
