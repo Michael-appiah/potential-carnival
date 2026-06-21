@@ -60,31 +60,45 @@ const Admin = () => {
         loadRecords();
     }, []);
 
-    // Live tracking listener
+    // Live tracking listener (Poll server logs + local logs)
     useEffect(() => {
-        const fetchLogs = () => {
-            const stored = localStorage.getItem('money_form_live_logs');
-            if (stored) {
-                setLogs(JSON.parse(stored));
-            } else {
-                setLogs([{ id: 'init', text: `[${new Date().toLocaleTimeString()}] SYSTEM: Live Tracking initialized. Waiting for user activity...`, type: 'info' }]);
+        const fetchServerLogs = async () => {
+            try {
+                const res = await fetch('/.netlify/functions/manage-logs');
+                const data = await res.json();
+                
+                // Retrieve local logs
+                const localStored = localStorage.getItem('money_form_live_logs') || '[]';
+                const localLogs = JSON.parse(localStored);
+                
+                // Combine and sort by timestamp descending
+                const combined = [...(data.logs || []), ...localLogs];
+                const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+                unique.sort((a, b) => b.timestamp - a.timestamp);
+                
+                setLogs(unique.slice(0, 50));
+            } catch (e) {
+                // Fallback to local logs if server fails
+                const localStored = localStorage.getItem('money_form_live_logs') || '[]';
+                setLogs(JSON.parse(localStored));
             }
         };
 
-        fetchLogs();
+        fetchServerLogs();
+        const interval = setInterval(fetchServerLogs, 3000);
 
         // Listen for updates from other tabs
         const handleStorage = (e) => {
-            if (e.key === 'money_form_live_logs') fetchLogs();
+            if (e.key === 'money_form_live_logs') fetchServerLogs();
         };
 
         window.addEventListener('storage', handleStorage);
-        // Listen for updates from the same tab
-        window.addEventListener('localLogUpdated', fetchLogs);
+        window.addEventListener('localLogUpdated', fetchServerLogs);
 
         return () => {
+            clearInterval(interval);
             window.removeEventListener('storage', handleStorage);
-            window.removeEventListener('localLogUpdated', fetchLogs);
+            window.removeEventListener('localLogUpdated', fetchServerLogs);
         };
     }, []);
 

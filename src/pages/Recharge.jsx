@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BrandIcon } from '../BrandIcon';
 import { logActivity } from '../utils/logger';
+import PaymentForm from '../components/PaymentForm';
 
 const BRANDS = [
     { id: 'apple', name: 'Apple', icon: '', color: 'apple' },
@@ -25,6 +26,7 @@ const Recharge = () => {
     const [showVoucher, setShowVoucher] = useState(false);
     const [voucherData, setVoucherData] = useState(null);
     const [toastMessage, setToastMessage] = useState('');
+    const [showPaymentForm, setShowPaymentForm] = useState(false);
 
     // Load Paystack script dynamically & check for payment reference on callback
     useEffect(() => {
@@ -143,7 +145,7 @@ const Recharge = () => {
     };
 
     // Initialize Paystack Payment Flow via Serverless
-    const handleCheckout = async (e) => {
+    const handleCheckout = (e) => {
         e.preventDefault();
         
         if (!email) {
@@ -151,45 +153,7 @@ const Recharge = () => {
             return;
         }
 
-        setIsLoading(true);
-        logActivity(`User initiated purchase for $${selectedAmount} ${selectedBrand.name} Gift Card. Email: ${email}`, 'info');
-        
-        try {
-            // Save pending details to restore on redirect
-            localStorage.setItem('pending_recharge', JSON.stringify({
-                brandId: selectedBrand.id,
-                amount: selectedAmount,
-                email: email
-            }));
-
-            const response = await fetch('/.netlify/functions/paystack-initialize', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email,
-                    amountInUsd: selectedAmount,
-                    callbackUrl: window.location.origin + window.location.pathname,
-                    metadata: {
-                        type: 'recharge',
-                        brandId: selectedBrand.id
-                    }
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.authorization_url) {
-                window.location.href = data.authorization_url;
-            } else {
-                setIsLoading(false);
-                alert('❌ Failed to initialize payment: ' + (data.error || 'Unknown error'));
-            }
-        } catch (err) {
-            setIsLoading(false);
-            alert('❌ Failed to connect to secure payment gateway.');
-        }
+        setShowPaymentForm(true);
     };
 
     const copyToClipboard = (text) => {
@@ -200,7 +164,7 @@ const Recharge = () => {
 
     return (
         <div className="container">
-            {!showVoucher && !isLoading ? (
+            {!showVoucher && !isLoading && !showPaymentForm ? (
                 <div className="content">
                     <div style={{ marginBottom: '16px' }}>
                         <h1 style={{ margin: 0 }}>Recharge Store</h1>
@@ -376,6 +340,19 @@ const Recharge = () => {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {showPaymentForm && !showVoucher && !isLoading && (
+                <PaymentForm
+                    amount={selectedAmount}
+                    email={email}
+                    type="recharge"
+                    onSuccess={(ref) => {
+                        setShowPaymentForm(false);
+                        triggerGenerationAnimation();
+                    }}
+                    onCancel={() => setShowPaymentForm(false)}
+                />
             )}
 
             {toastMessage && <div className="toast-msg">{toastMessage}</div>}
