@@ -55,8 +55,14 @@ const Home = () => {
                         </div>
                     </div>
                     
-                    <div className="security-notice" style={{ marginTop: '30px', padding: '16px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#475569', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                        <strong>🔒 Enhanced Security:</strong> In compliance with the U.S. Bank Secrecy Act (BSA) and anti-money laundering (AML) regulations, we have implemented advanced security measures. All gift card purchases are now subject to <strong>manual clearance</strong> to prevent fraudulent activities and ensure a safe gifting experience.
+                    <div className="security-notice" style={{ marginTop: '36px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <div style={{ background: '#e2e8f0', padding: '8px', borderRadius: '50%', display: 'flex', flexShrink: 0 }}>
+                            <img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/shield-check.svg" width="16" height="16" alt="Shield" />
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.6' }}>
+                            <strong style={{ color: '#334155', fontWeight: '600' }}>Federal AML Compliance</strong><br />
+                            To ensure a secure environment and comply with the U.S. Bank Secrecy Act, all transactions undergo mandatory <strong>manual clearance</strong> to prevent money laundering and protect our customers.
+                        </div>
                     </div>
                 </div>
 
