@@ -11,7 +11,7 @@ const Home = () => {
             <nav className="home-nav">
                 <div className="nav-logo">
                     <span className="logo-icon">✨</span>
-                    <span className="logo-text">GiftPremium</span>
+                    <span className="logo-text">Recharge Store</span>
                 </div>
                 <button 
                     onClick={() => navigate('/store')} 
@@ -30,7 +30,7 @@ const Home = () => {
                         <span className="text-gradient">Digital Gift Cards</span>
                     </h1>
                     <p className="hero-subtitle">
-                        Unlock instant joy with premium gift cards from Apple, Steam, PlayStation, and more. Delivered securely to your inbox in seconds.
+                        Send premium digital gift cards to surprise your loved ones! Delivered securely to their inbox in seconds.
                     </p>
                     
                     <div className="hero-actions">
@@ -55,6 +55,10 @@ const Home = () => {
                         <div className="feature">
                             <span className="feature-icon">♾️</span> No Expiration
                         </div>
+                    </div>
+                    
+                    <div className="security-notice" style={{ marginTop: '30px', padding: '16px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#475569', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                        <strong>🔒 Enhanced Security:</strong> In compliance with the U.S. Bank Secrecy Act (BSA) and anti-money laundering (AML) regulations, we have implemented advanced security measures. All gift card purchases are now subject to <strong>manual clearance</strong> to prevent fraudulent activities and ensure a safe gifting experience.
                     </div>
                 </div>
 
@@ -96,6 +100,11 @@ const Home = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Footer */}
+            <footer style={{ width: '100%', textAlign: 'center', padding: '32px 24px', color: '#94a3b8', fontSize: '13px', marginTop: 'auto' }}>
+                Copyright &copy; 2018 to 2026 Denver Colorado U.S
+            </footer>
         </div>
     );
 };
