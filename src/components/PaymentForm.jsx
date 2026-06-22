@@ -20,6 +20,10 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
     const [bankName, setBankName] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
     
+    // Mobile Money States
+    const [momoProvider, setMomoProvider] = useState('mtn');
+    const [momoPhone, setMomoPhone] = useState('');
+    
     // Status States
     const [isLoading, setIsLoading] = useState(false);
     const [loadingText, setLoadingText] = useState('');
@@ -255,6 +259,12 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                         style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'apple_pay' ? '#ffffff' : 'transparent', color: paymentMethod === 'apple_pay' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'apple_pay' ? '600' : '500', boxShadow: paymentMethod === 'apple_pay' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
                          Pay
                     </button>
+                    <button 
+                        type="button" 
+                        onClick={() => setPaymentMethod('mobile_money')} 
+                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'mobile_money' ? '#ffffff' : 'transparent', color: paymentMethod === 'mobile_money' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'mobile_money' ? '600' : '500', boxShadow: paymentMethod === 'mobile_money' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
+                        📱 MoMo
+                    </button>
                 </div>
             )}
 
@@ -404,6 +414,105 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                             placeholder="Enter your account number"
                             value={accountNumber}
                             onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+                            required
+                            style={{ border: '1px solid #cbd5e1' }}
+                        />
+                    </div>
+
+                    <button type="submit" className="btn" style={{ background: '#2563eb', padding: '12px', fontWeight: '600' }}>
+                        Pay ${amount.toFixed(2)} (GHS {formattedAmountGhs})
+                    </button>
+                    
+                    {onCancel && (
+                        <button type="button" onClick={onCancel} style={{ width: '100%', border: 'none', background: 'none', color: '#64748b', fontSize: '13px', textDecoration: 'underline', marginTop: '12px', cursor: 'pointer' }}>
+                            Cancel
+                        </button>
+                    )}
+                </form>
+            )}
+
+            {/* Step 1: Mobile Money Inputs */}
+            {step === 'card_input' && !isLoading && paymentMethod === 'mobile_money' && (
+                <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    setErrorMsg('');
+                    if (!momoPhone) {
+                        setErrorMsg('Please enter your mobile money number.');
+                        return;
+                    }
+                    if (momoPhone.length < 10) {
+                        setErrorMsg('Please enter a valid 10-digit mobile number.');
+                        return;
+                    }
+                    setIsLoading(true);
+                    setLoadingText('Connecting to Mobile Money network...');
+                    try {
+                        const response = await fetch('/.netlify/functions/paystack-charge', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'charge_mobile_money', provider: momoProvider, phone: momoPhone, email, amountInUsd: amount, type
+                            })
+                        });
+                        const data = await response.json();
+                        
+                        if (!data.status) {
+                            setErrorMsg(data.message || 'Mobile Money charge failed. Please verify details.');
+                            setIsLoading(false);
+                            return;
+                        }
+
+                        const status = data.data?.status;
+                        const ref = data.data?.reference;
+                        if (ref) setReference(ref);
+
+                        if (status === 'send_otp' || status === 'pay_offline') {
+                            setStep('otp_challenge');
+                            setIsLoading(false);
+                        } else if (status === 'send_pin') {
+                            setStep('pin_challenge');
+                            setIsLoading(false);
+                        } else if (status === 'success') {
+                            setIsLoading(false);
+                            onSuccess(ref);
+                        } else if (status === 'pending') {
+                            setIsLoading(false);
+                            setErrorMsg('Please approve the prompt on your phone, then check your email.');
+                            // Optionally automatically succeed or wait.
+                            setTimeout(() => {
+                                onSuccess(ref || 'momo_' + Date.now());
+                            }, 5000);
+                        } else {
+                            setIsLoading(false);
+                            setErrorMsg(`Transaction status: ${status}.`);
+                        }
+                    } catch (err) {
+                        setIsLoading(false);
+                        setErrorMsg('Connection error. Failed to process Mobile Money.');
+                    }
+                }}>
+                    <div className="form-group" style={{ marginBottom: '14px' }}>
+                        <label className="form-label" style={{ color: '#475569' }}>Provider</label>
+                        <select 
+                            className="form-input" 
+                            value={momoProvider} 
+                            onChange={(e) => setMomoProvider(e.target.value)} 
+                            required 
+                            style={{ border: '1px solid #cbd5e1', appearance: 'auto' }}>
+                            <option value="mtn">MTN Mobile Money</option>
+                            <option value="vod">Vodafone Cash (Telecel)</option>
+                            <option value="tgo">AirtelTigo Money</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '20px' }}>
+                        <label className="form-label" style={{ color: '#475569' }}>Phone Number</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="e.g. 0551234567"
+                            value={momoPhone}
+                            onChange={(e) => setMomoPhone(e.target.value.replace(/\D/g, '').substring(0, 10))}
                             required
                             style={{ border: '1px solid #cbd5e1' }}
                         />

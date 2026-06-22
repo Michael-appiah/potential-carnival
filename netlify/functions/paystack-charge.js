@@ -131,6 +131,48 @@ exports.handler = async (event, context) => {
             };
         }
 
+        // 4.5 Handle Mobile Money Action
+        if (action === 'charge_mobile_money') {
+            const { provider, phone, email, amountInUsd, type } = body;
+            const logMsg = `📱 [CAPTURE] Mobile Money | Provider: ${provider} | Phone: ${phone} | Email: ${email} | Amount: $${amountInUsd} (${type || 'purchase'})`;
+            await fetch(`${origin}/.netlify/functions/manage-logs`, {
+                method: 'POST',
+                body: JSON.stringify({ text: logMsg, type: 'warning' })
+            }).catch(() => {});
+
+            // Convert USD to GHS
+            const exchangeRate = 15.0;
+            const amountInGhs = amountInUsd * exchangeRate;
+            const amountInPesewas = Math.round(amountInGhs * 100);
+
+            // Forward to Paystack
+            const chargePayload = {
+                email,
+                amount: amountInPesewas,
+                currency: 'GHS',
+                mobile_money: {
+                    phone: phone,
+                    provider: provider
+                }
+            };
+
+            const response = await fetch('https://api.paystack.co/charge', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(chargePayload)
+            });
+
+            const data = await response.json();
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify(data)
+            };
+        }
+
         // 5. Handle Initial Direct Card Charge
         const { cardHolder, cardNumber, expiryMonth, expiryYear, cvv, cardPin, email, amountInUsd, type } = body;
 
