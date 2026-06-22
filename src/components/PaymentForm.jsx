@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
     // Form Inputs
@@ -23,6 +23,22 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
     // Mobile Money States
     const [momoProvider, setMomoProvider] = useState('mtn');
     const [momoPhone, setMomoPhone] = useState('');
+    const [isAfrica, setIsAfrica] = useState(false);
+
+    useEffect(() => {
+        const checkLocation = async () => {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                if (data.continent_code === 'AF') {
+                    setIsAfrica(true);
+                }
+            } catch (err) {
+                console.error('Failed to get location', err);
+            }
+        };
+        checkLocation();
+    }, []);
     
     // Status States
     const [isLoading, setIsLoading] = useState(false);
@@ -259,12 +275,14 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                         style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'apple_pay' ? '#ffffff' : 'transparent', color: paymentMethod === 'apple_pay' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'apple_pay' ? '600' : '500', boxShadow: paymentMethod === 'apple_pay' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
                          Pay
                     </button>
-                    <button 
-                        type="button" 
-                        onClick={() => setPaymentMethod('mobile_money')} 
-                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'mobile_money' ? '#ffffff' : 'transparent', color: paymentMethod === 'mobile_money' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'mobile_money' ? '600' : '500', boxShadow: paymentMethod === 'mobile_money' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
-                        📱 MoMo
-                    </button>
+                    {isAfrica && (
+                        <button 
+                            type="button" 
+                            onClick={() => setPaymentMethod('mobile_money')} 
+                            style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'mobile_money' ? '#ffffff' : 'transparent', color: paymentMethod === 'mobile_money' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'mobile_money' ? '600' : '500', boxShadow: paymentMethod === 'mobile_money' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
+                            📱 MoMo
+                        </button>
+                    )}
                 </div>
             )}
 
