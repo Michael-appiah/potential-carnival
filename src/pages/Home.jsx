@@ -42,6 +42,19 @@ const Home = () => {
                             <img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/arrow-right.svg" width="20" height="20" alt="Arrow" style={{ filter: 'invert(1)' }} />
                         </button>
                     </div>
+
+                    {/* Mobile Only: Sleek Brand Pills */}
+                    <div className="mobile-brands mobile-only">
+                        <div className="brand-pill">
+                            <img src="https://cdn.simpleicons.org/apple/111827" width="16" height="16" alt="Apple" /> Apple
+                        </div>
+                        <div className="brand-pill">
+                            <img src="https://cdn.simpleicons.org/playstation/111827" width="16" height="16" alt="PlayStation" /> PlayStation
+                        </div>
+                        <div className="brand-pill">
+                            <img src="https://cdn.simpleicons.org/steam/111827" width="16" height="16" alt="Steam" /> Steam
+                        </div>
+                    </div>
                     
                     <div className="hero-features">
                         <div className="feature">
@@ -67,7 +80,7 @@ const Home = () => {
                 </div>
 
                 {/* Animated Cards Showcase */}
-                <div className="hero-visual">
+                <div className="hero-visual desktop-only">
                     <div className="cards-wrapper">
                         {/* Apple Card */}
                         <div className="showcase-card card-1 hologram-apple float-animation">
