@@ -289,28 +289,53 @@
 @media (max-width: 600px) {
     .home-nav {
         padding: 16px 20px;
+        position: relative;
+        z-index: 20;
     }
     
     .hero-section {
-        padding: 20px 16px;
-        gap: 30px;
+        padding: 20px 16px 80px;
+        position: relative;
+        display: block; /* Stop flex column flow */
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     .hero-title {
-        font-size: 36px;
+        font-size: 38px;
     }
     
     .hero-subtitle {
         font-size: 15px;
         margin-bottom: 24px;
+        font-weight: 500;
+        text-shadow: 0 1px 4px rgba(255,255,255,0.9);
     }
     
     .hero-visual {
-        height: 340px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        opacity: 0.25;
+        pointer-events: none;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        overflow: hidden;
+        padding-top: 60px;
     }
     
     .cards-wrapper {
-        transform: scale(0.7);
+        transform: scale(0.9);
         transform-origin: top center;
     }
     
@@ -319,6 +344,7 @@
         align-items: flex-start;
         gap: 12px;
         padding: 16px;
+        background: rgba(255, 255, 255, 0.85);
     }
     
     .hero-btn-primary {
