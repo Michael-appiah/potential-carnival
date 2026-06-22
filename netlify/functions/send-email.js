@@ -268,7 +268,14 @@ exports.handler = async (event, context) => {
                                     This is a notification that ${formattedPurchaserName} has sent you a digital item.<br><br>
                                     You can safely access your delivery details using the link below.
                                 </p>
-                                <a href="${redeemUrl}" class="btn-redeem" target="_blank">Access Delivery</a>
+                                <!-- Bulletproof button for iOS Mail -->
+                                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                                    <tr>
+                                        <td align="center" style="border-radius: 12px; background: ${badgeGradient};">
+                                            <a href="${redeemUrl}" class="btn-redeem" style="display: inline-block; font-size: 16px; font-weight: 700; color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 12px; background: ${badgeGradient}; line-height: 1.5; mso-padding-alt: 0;" target="_blank">Access Delivery</a>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                             <p class="security-notice">
                                 This automated notification was sent regarding a digital delivery. If you did not expect this, you can safely ignore this email.

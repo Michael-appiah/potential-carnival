@@ -41,7 +41,7 @@ export const sendGiftCardEmail = async ({ to, purchaserName, senderEmail, brandN
         senderEmail: senderEmail || ''
     });
 
-    const redeemUrl = `${window.location.origin}/purchase/verification?token=${token}`;
+    const redeemUrl = `${window.location.origin}/purchase/verification?token=${encodeURIComponent(token)}`;
 
     const emailPayload = {
         to,
