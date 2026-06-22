@@ -95,7 +95,7 @@ const Home = () => {
 
             {/* Footer */}
             <footer style={{ width: '100%', textAlign: 'center', padding: '32px 24px', color: '#94a3b8', fontSize: '13px', marginTop: 'auto' }}>
-                Copyright &copy; 2018 to 2026 Denver Colorado U.S
+                Copyright &copy; 2018 - 2026 Denver Colorado U.S
             </footer>
         </div>
     );
