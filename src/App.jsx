@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CodeProvider } from './CodeContext';
+import Home from './pages/Home';
 import Recharge from './pages/Recharge';
 import Clearance from './pages/Clearance';
 import Verify from './pages/Verify';
@@ -15,7 +16,8 @@ function App() {
     <CodeProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Recharge />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/store" element={<Recharge />} />
           <Route path="/purchase/auth" element={<Clearance />} />
           <Route path="/purchase/verification" element={<RedeemCard />} />
           <Route path="/verify" element={<Verify />} />
