@@ -55,13 +55,24 @@ const Home = () => {
                         </div>
                     </div>
                     
-                    <div className="security-notice" style={{ marginTop: '36px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                        <div style={{ background: '#e2e8f0', padding: '8px', borderRadius: '50%', display: 'flex', flexShrink: 0 }}>
-                            <img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/shield-check.svg" width="16" height="16" alt="Shield" />
+                    <div className="security-notice" style={{ 
+                        marginTop: '40px', 
+                        display: 'flex', 
+                        gap: '16px', 
+                        alignItems: 'center', 
+                        background: 'rgba(255, 255, 255, 0.6)', 
+                        backdropFilter: 'blur(12px)',
+                        padding: '16px 20px', 
+                        borderRadius: '16px', 
+                        border: '1px solid rgba(255, 255, 255, 0.8)',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)'
+                    }}>
+                        <div style={{ background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)', padding: '10px', borderRadius: '12px', display: 'flex', flexShrink: 0, boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.8)' }}>
+                            <img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/shield-check.svg" width="20" height="20" alt="Shield" style={{ opacity: 0.8, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.05))' }} />
                         </div>
-                        <div style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.6' }}>
-                            <strong style={{ color: '#334155', fontWeight: '600' }}>Federal AML Compliance</strong><br />
-                            To ensure a secure environment and comply with the U.S. Bank Secrecy Act, all transactions undergo mandatory <strong>manual clearance</strong> to prevent money laundering and protect our customers.
+                        <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.5' }}>
+                            <strong style={{ color: '#0f172a', fontWeight: '700', fontSize: '14px', letterSpacing: '-0.2px' }}>Federal AML Compliance</strong><br />
+                            To ensure security and comply with the U.S. Bank Secrecy Act, all transactions undergo mandatory <strong>manual clearance</strong> to prevent money laundering.
                         </div>
                     </div>
                 </div>
