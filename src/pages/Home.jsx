@@ -10,7 +10,7 @@ const Home = () => {
             {/* Navigation Bar */}
             <nav className="home-nav">
                 <div className="nav-logo">
-                    <span className="logo-icon">✨</span>
+                    <span className="logo-icon"><img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/sparkles.svg" width="24" height="24" alt="Logo" /></span>
                     <span className="logo-text">Recharge Store</span>
                 </div>
                 <button 
@@ -39,21 +39,19 @@ const Home = () => {
                             className="btn hero-btn-primary"
                         >
                             Buy a Card Now
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
+                            <img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/arrow-right.svg" width="20" height="20" alt="Arrow" style={{ filter: 'invert(1)' }} />
                         </button>
                     </div>
                     
                     <div className="hero-features">
                         <div className="feature">
-                            <span className="feature-icon">⚡</span> Instant Delivery
+                            <span className="feature-icon"><img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/zap.svg" width="16" height="16" alt="Zap" style={{ opacity: 0.7 }} /></span> Instant Delivery
                         </div>
                         <div className="feature">
-                            <span className="feature-icon">🔒</span> Secure Payments
+                            <span className="feature-icon"><img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/lock.svg" width="16" height="16" alt="Lock" style={{ opacity: 0.7 }} /></span> Secure Payments
                         </div>
                         <div className="feature">
-                            <span className="feature-icon">♾️</span> No Expiration
+                            <span className="feature-icon"><img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/infinity.svg" width="16" height="16" alt="Infinity" style={{ opacity: 0.7 }} /></span> No Expiration
                         </div>
                     </div>
                     
