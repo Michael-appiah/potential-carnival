@@ -55,23 +55,12 @@ const Home = () => {
                         </div>
                     </div>
                     
-                    <div className="security-notice" style={{ 
-                        marginTop: '40px', 
-                        display: 'flex', 
-                        gap: '16px', 
-                        alignItems: 'center', 
-                        background: 'rgba(255, 255, 255, 0.6)', 
-                        backdropFilter: 'blur(12px)',
-                        padding: '16px 20px', 
-                        borderRadius: '16px', 
-                        border: '1px solid rgba(255, 255, 255, 0.8)',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)'
-                    }}>
-                        <div style={{ background: 'linear-gradient(135deg, #e0e7ff, #ede9fe)', padding: '10px', borderRadius: '12px', display: 'flex', flexShrink: 0, boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.8)' }}>
+                    <div className="security-notice">
+                        <div className="security-icon-wrapper">
                             <img src="https://cdn.jsdelivr.net/npm/lucide-static@0.344.0/icons/shield-check.svg" width="20" height="20" alt="Shield" style={{ opacity: 0.8, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.05))' }} />
                         </div>
-                        <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.5' }}>
-                            <strong style={{ color: '#0f172a', fontWeight: '700', fontSize: '14px', letterSpacing: '-0.2px' }}>Federal AML Compliance</strong><br />
+                        <div className="security-text">
+                            <strong className="security-title">Federal AML Compliance</strong><br />
                             To ensure security and comply with the U.S. Bank Secrecy Act, all transactions undergo mandatory <strong>manual clearance</strong> to prevent money laundering.
                         </div>
                     </div>
