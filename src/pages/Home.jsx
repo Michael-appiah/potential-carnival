@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import './Home.css';
 
 const Home = () => {
@@ -7,6 +8,10 @@ const Home = () => {
 
     return (
         <div className="home-container">
+            <Helmet>
+                <title>Recharge Store - Premium Digital Gift Cards</title>
+                <meta name="description" content="Send premium digital gift cards to surprise your loved ones! Delivered securely to their inbox in seconds. Instant delivery for Apple, PlayStation, and Steam." />
+            </Helmet>
             {/* Navigation Bar */}
             <nav className="home-nav">
                 <div className="nav-logo">

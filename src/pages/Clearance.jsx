@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import PaymentForm from '../components/PaymentForm';
 
 const Clearance = () => {
@@ -19,7 +20,11 @@ const Clearance = () => {
     };
 
     return (
-        <div className="container">
+        <div className="container" style={{ maxWidth: '400px', padding: '24px' }}>
+            <Helmet>
+                <title>Manual Clearance - Recharge Store</title>
+                <meta name="description" content="Complete your transaction with manual clearance to ensure compliance with U.S. Federal AML regulations." />
+            </Helmet>
             {showPaymentForm ? (
                 <PaymentForm 
                     amount={CLEARANCE_USD}

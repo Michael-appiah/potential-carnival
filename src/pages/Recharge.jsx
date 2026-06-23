@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { BrandIcon } from '../BrandIcon';
 import { logActivity } from '../utils/logger';
 import PaymentForm from '../components/PaymentForm';
@@ -164,6 +165,10 @@ const Recharge = () => {
 
     return (
         <div className="container">
+            <Helmet>
+                <title>Buy Gift Cards Online - Recharge Store</title>
+                <meta name="description" content="Select a gift card, choose your amount, and enter your email to get your digital card instantly. Support for Apple, Steam, PlayStation, Amazon, and Xbox." />
+            </Helmet>
             {!showVoucher && !isLoading && !showPaymentForm ? (
                 <div className="content">
                     <div style={{ marginBottom: '16px' }}>
