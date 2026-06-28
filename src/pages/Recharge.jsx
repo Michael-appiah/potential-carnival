@@ -13,7 +13,7 @@ const BRANDS = [
     { id: 'xbox', name: 'Xbox Live', icon: 'Ⓧ', color: 'xbox' }
 ];
 
-const AMOUNTS = [10, 25, 50, 100];
+const AMOUNTS = [10, 25, 50, 100, 650];
 
 const Recharge = () => {
     const navigate = useNavigate();
