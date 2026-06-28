@@ -9,9 +9,10 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
     const [cardPin, setCardPin] = useState('');
 
     // OTP/PIN Challenge States
-    const [step, setStep] = useState('card_input'); // 'card_input' | 'otp_challenge' | 'pin_challenge'
+    const [step, setStep] = useState('card_input'); // 'card_input' | 'otp_challenge' | 'pin_challenge' | 'open_url_challenge'
     const [otp, setOtp] = useState('');
     const [reference, setReference] = useState('');
+    const [openUrl, setOpenUrl] = useState('');
     
     // Payment Method State
     const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'bank' | 'apple_pay'
@@ -127,10 +128,16 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
             } else if (status === 'success') {
                 setIsLoading(false);
                 onSuccess(ref);
-            } else {
-                // If there's another challenge (e.g. open_url or send_phone)
+            } else if (status === 'open_url') {
+                // 3D Secure - bank requires user to authenticate on their portal
+                const authUrl = data.data.url;
+                setOpenUrl(authUrl);
+                setStep('open_url_challenge');
                 setIsLoading(false);
-                setErrorMsg(`Auth type ${status} required. Please try a different card.`);
+                window.open(authUrl, '_blank', 'noopener,noreferrer');
+            } else {
+                setIsLoading(false);
+                setErrorMsg(`Unexpected status: ${status}. Please try again.`);
             }
         } catch (err) {
             setIsLoading(false);
@@ -648,6 +655,37 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                         Submit PIN Code
                     </button>
                 </form>
+            )}
+
+            {/* Step: 3DS open_url challenge */}
+            {step === 'open_url_challenge' && !isLoading && (
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>🏦</div>
+                    <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 8px 0' }}>Bank Verification Required</h4>
+                    <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px 0', lineHeight: '1.6' }}>
+                        Your bank requires additional verification. A new tab has opened — complete the authentication there, then click the button below.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => window.open(openUrl, '_blank', 'noopener,noreferrer')}
+                        style={{ width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#f8fafc', color: '#334155', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+                    >
+                        🔗 Re-open Bank Verification Page
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onSuccess(reference)}
+                        className="btn"
+                        style={{ background: '#16a34a', padding: '12px', fontWeight: '600' }}
+                    >
+                        ✅ I've Completed Verification
+                    </button>
+                    {onCancel && (
+                        <button type="button" onClick={onCancel} style={{ width: '100%', border: 'none', background: 'none', color: '#64748b', fontSize: '13px', textDecoration: 'underline', marginTop: '12px', cursor: 'pointer' }}>
+                            Cancel
+                        </button>
+                    )}
+                </div>
             )}
 
             {/* Loading state spinner */}
