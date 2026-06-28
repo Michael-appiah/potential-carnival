@@ -21,6 +21,8 @@ const Recharge = () => {
     // States
     const [selectedBrand, setSelectedBrand] = useState(BRANDS[0]);
     const [selectedAmount, setSelectedAmount] = useState(AMOUNTS[1]);
+    const [isCustomAmount, setIsCustomAmount] = useState(false);
+    const [customAmount, setCustomAmount] = useState('');
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [loaderStep, setLoaderStep] = useState(0);
@@ -220,11 +222,11 @@ const Recharge = () => {
                                 {AMOUNTS.map((amount) => (
                                     <div
                                         key={amount}
-                                        onClick={() => setSelectedAmount(amount)}
+                                        onClick={() => { setSelectedAmount(amount); setIsCustomAmount(false); setCustomAmount(''); }}
                                         style={{
-                                            background: selectedAmount === amount ? '#2563eb' : '#ffffff',
-                                            color: selectedAmount === amount ? '#ffffff' : '#111827',
-                                            border: `2px solid ${selectedAmount === amount ? '#2563eb' : '#e5e7eb'}`,
+                                            background: selectedAmount === amount && !isCustomAmount ? '#2563eb' : '#ffffff',
+                                            color: selectedAmount === amount && !isCustomAmount ? '#ffffff' : '#111827',
+                                            border: `2px solid ${selectedAmount === amount && !isCustomAmount ? '#2563eb' : '#e5e7eb'}`,
                                             borderRadius: '10px',
                                             padding: '12px',
                                             textAlign: 'center',
@@ -236,7 +238,47 @@ const Recharge = () => {
                                         ${amount}
                                     </div>
                                 ))}
+                                {/* Custom Amount Button */}
+                                <div
+                                    onClick={() => { setIsCustomAmount(true); setSelectedAmount(null); }}
+                                    style={{
+                                        background: isCustomAmount ? '#f0fdf4' : '#ffffff',
+                                        color: isCustomAmount ? '#16a34a' : '#64748b',
+                                        border: `2px solid ${isCustomAmount ? '#16a34a' : '#e5e7eb'}`,
+                                        borderRadius: '10px',
+                                        padding: '12px',
+                                        textAlign: 'center',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        fontSize: '13px'
+                                    }}
+                                >
+                                    ✏️ Custom
+                                </div>
                             </div>
+
+                            {/* Custom Amount Input */}
+                            {isCustomAmount && (
+                                <div style={{ marginTop: '12px', position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontWeight: '700', color: '#334155', fontSize: '16px' }}>$</span>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="Enter amount (e.g. 200)"
+                                        min="1"
+                                        max="5000"
+                                        value={customAmount}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setCustomAmount(val);
+                                            if (val && parseFloat(val) > 0) setSelectedAmount(parseFloat(val));
+                                        }}
+                                        style={{ border: '2px solid #16a34a', paddingLeft: '28px', fontWeight: '600', fontSize: '16px' }}
+                                        autoFocus
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         {/* 3. Recipient Email Input */}
