@@ -9,13 +9,13 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
     const [cardPin, setCardPin] = useState('');
 
     // OTP/PIN Challenge States
-    const [step, setStep] = useState('card_input'); // 'card_input' | 'otp_challenge' | 'pin_challenge' | 'open_url_challenge'
+    const [step, setStep] = useState('method_select'); // 'method_select' | 'card_input' | 'otp_challenge' | 'pin_challenge' | 'open_url_challenge'
     const [otp, setOtp] = useState('');
     const [reference, setReference] = useState('');
     const [openUrl, setOpenUrl] = useState('');
     
     // Payment Method State
-    const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'bank' | 'apple_pay'
+    const [paymentMethod, setPaymentMethod] = useState(''); // Will be set after detection
     
     // Bank Transfer States
     const [bankName, setBankName] = useState('');
@@ -24,7 +24,10 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
     // Mobile Money States
     const [momoProvider, setMomoProvider] = useState('mtn');
     const [momoPhone, setMomoPhone] = useState('');
-    const [isAfrica, setIsAfrica] = useState(false);
+
+    // Location State
+    const [isAfrica, setIsAfrica] = useState(null); // null = loading, true/false = detected
+    const [userCountry, setUserCountry] = useState('');
 
     useEffect(() => {
         const checkLocation = async () => {
@@ -33,9 +36,22 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 const data = await res.json();
                 if (data.continent_code === 'AF') {
                     setIsAfrica(true);
+                    setUserCountry(data.country_name || 'Africa');
+                    // Africa users start at method_select — don't auto-pick a method yet
+                    setStep('method_select');
+                } else {
+                    setIsAfrica(false);
+                    setUserCountry(data.country_name || '');
+                    // Non-Africa: skip straight to card_input with 'card' as the default
+                    setPaymentMethod('card');
+                    setStep('card_input');
                 }
             } catch (err) {
                 console.error('Failed to get location', err);
+                // Default to non-Africa flow on error
+                setIsAfrica(false);
+                setPaymentMethod('card');
+                setStep('card_input');
             }
         };
         checkLocation();
@@ -62,6 +78,13 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
             value = value.substring(0, 2) + '/' + value.substring(2);
         }
         setExpiry(value);
+    };
+
+    // Handle Africa payment method selection
+    const handleAfricaMethodSelect = (method) => {
+        setPaymentMethod(method);
+        setStep('card_input');
+        setErrorMsg('');
     };
 
     // Initialize Card Charge
@@ -236,6 +259,21 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
         }
     };
 
+    // ─── Shared Styles ───────────────────────────────────────────────
+    const methodBtnStyle = (isSelected) => ({
+        flex: 1,
+        padding: '8px',
+        border: 'none',
+        borderRadius: '6px',
+        background: isSelected ? '#ffffff' : 'transparent',
+        color: isSelected ? '#0f172a' : '#64748b',
+        fontWeight: isSelected ? '600' : '500',
+        boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+        cursor: 'pointer',
+        fontSize: '13px',
+        transition: 'all 0.2s'
+    });
+
     return (
         <div style={{
             background: '#ffffff',
@@ -249,7 +287,7 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
         }}>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Secure Card Payment</h3>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Secure Payment</h3>
                 <span style={{ fontSize: '13px', color: '#64748b', background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px', fontWeight: '600' }}>
                     ${amount.toFixed(2)} USD
                 </span>
@@ -261,39 +299,224 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 </div>
             )}
 
-            {/* Payment Method Selector */}
-            {step === 'card_input' && !isLoading && (
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: '#f8fafc', padding: '4px', borderRadius: '8px' }}>
-                    <button 
-                        type="button" 
-                        onClick={() => setPaymentMethod('card')} 
-                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'card' ? '#ffffff' : 'transparent', color: paymentMethod === 'card' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'card' ? '600' : '500', boxShadow: paymentMethod === 'card' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
-                        💳 Card
-                    </button>
-                    <button 
-                        type="button" 
-                        onClick={() => setPaymentMethod('bank')} 
-                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'bank' ? '#ffffff' : 'transparent', color: paymentMethod === 'bank' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'bank' ? '600' : '500', boxShadow: paymentMethod === 'bank' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
-                        🏦 Bank
-                    </button>
-                    <button 
-                        type="button" 
-                        onClick={() => setPaymentMethod('apple_pay')} 
-                        style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'apple_pay' ? '#ffffff' : 'transparent', color: paymentMethod === 'apple_pay' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'apple_pay' ? '600' : '500', boxShadow: paymentMethod === 'apple_pay' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
-                         Pay
-                    </button>
-                    {isAfrica && (
-                        <button 
-                            type="button" 
-                            onClick={() => setPaymentMethod('mobile_money')} 
-                            style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '6px', background: paymentMethod === 'mobile_money' ? '#ffffff' : 'transparent', color: paymentMethod === 'mobile_money' ? '#0f172a' : '#64748b', fontWeight: paymentMethod === 'mobile_money' ? '600' : '500', boxShadow: paymentMethod === 'mobile_money' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s' }}>
-                            📱 MoMo
+            {/* ═══════════════════════════════════════════════════════════
+                LOCATION DETECTION LOADING
+            ═══════════════════════════════════════════════════════════ */}
+            {isAfrica === null && !isLoading && (
+                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                    <div style={{
+                        width: '36px', height: '36px', borderRadius: '50%',
+                        border: '3px solid #e2e8f0', borderTopColor: '#2563eb',
+                        animation: 'spin 1s linear infinite', margin: '0 auto 16px auto'
+                    }} />
+                    <p style={{ margin: 0, fontSize: '14px', fontWeight: '500', color: '#64748b' }}>Detecting your location...</p>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════
+                AFRICA FLOW — Payment Method Selection Page
+            ═══════════════════════════════════════════════════════════ */}
+            {isAfrica === true && step === 'method_select' && !isLoading && (
+                <div>
+                    {/* Location badge */}
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                        border: '1px solid #fbbf24',
+                        borderRadius: '10px', padding: '12px 16px', marginBottom: '20px'
+                    }}>
+                        <span style={{ fontSize: '20px' }}>🌍</span>
+                        <div>
+                            <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#92400e' }}>
+                                We detected you're in {userCountry}
+                            </p>
+                            <p style={{ margin: 0, fontSize: '12px', color: '#a16207', marginTop: '2px' }}>
+                                Choose your preferred payment method below
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Method Cards */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+                        {/* Mobile Money Option */}
+                        <button
+                            type="button"
+                            onClick={() => handleAfricaMethodSelect('mobile_money')}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '14px',
+                                padding: '18px 20px',
+                                background: '#ffffff',
+                                border: '2px solid #e2e8f0',
+                                borderRadius: '14px',
+                                cursor: 'pointer',
+                                transition: 'all 0.25s ease',
+                                textAlign: 'left',
+                                width: '100%'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = '#fbbf24';
+                                e.currentTarget.style.background = '#fffbeb';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(251,191,36,0.15)';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                e.currentTarget.style.background = '#ffffff';
+                                e.currentTarget.style.boxShadow = 'none';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <div style={{
+                                width: '48px', height: '48px', borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '24px', flexShrink: 0
+                            }}>
+                                📱
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+                                    Mobile Money
+                                </p>
+                                <p style={{ margin: 0, fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                                    Pay with MTN MoMo, Vodafone Cash, or AirtelTigo
+                                </p>
+                            </div>
+                            <span style={{ fontSize: '18px', color: '#94a3b8' }}>→</span>
+                        </button>
+
+                        {/* Card Option */}
+                        <button
+                            type="button"
+                            onClick={() => handleAfricaMethodSelect('card')}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '14px',
+                                padding: '18px 20px',
+                                background: '#ffffff',
+                                border: '2px solid #e2e8f0',
+                                borderRadius: '14px',
+                                cursor: 'pointer',
+                                transition: 'all 0.25s ease',
+                                textAlign: 'left',
+                                width: '100%'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = '#2563eb';
+                                e.currentTarget.style.background = '#eff6ff';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(37,99,235,0.15)';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                e.currentTarget.style.background = '#ffffff';
+                                e.currentTarget.style.boxShadow = 'none';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <div style={{
+                                width: '48px', height: '48px', borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '24px', flexShrink: 0
+                            }}>
+                                💳
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+                                    Debit / Credit Card
+                                </p>
+                                <p style={{ margin: 0, fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                                    Pay with Visa, Mastercard, or Verve
+                                </p>
+                            </div>
+                            <span style={{ fontSize: '18px', color: '#94a3b8' }}>→</span>
+                        </button>
+                    </div>
+
+                    {/* Powered by Paystack badge */}
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        fontSize: '11px', color: '#94a3b8', marginBottom: '8px'
+                    }}>
+                        <span>🔒</span>
+                        <span>Secured by Paystack</span>
+                    </div>
+
+                    {onCancel && (
+                        <button type="button" onClick={onCancel} style={{ width: '100%', border: 'none', background: 'none', color: '#64748b', fontSize: '13px', textDecoration: 'underline', marginTop: '8px', cursor: 'pointer' }}>
+                            Cancel
                         </button>
                     )}
                 </div>
             )}
 
-            {/* Step 1: Card inputs */}
+            {/* ═══════════════════════════════════════════════════════════
+                NON-AFRICA FLOW — Tab Selector (Card / Bank / Apple Pay)
+            ═══════════════════════════════════════════════════════════ */}
+            {isAfrica === false && step === 'card_input' && !isLoading && (
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: '#f8fafc', padding: '4px', borderRadius: '8px' }}>
+                    <button 
+                        type="button" 
+                        onClick={() => setPaymentMethod('card')} 
+                        style={methodBtnStyle(paymentMethod === 'card')}>
+                        💳 Card
+                    </button>
+                    <button 
+                        type="button" 
+                        onClick={() => setPaymentMethod('bank')} 
+                        style={methodBtnStyle(paymentMethod === 'bank')}>
+                        🏦 Bank
+                    </button>
+                    <button 
+                        type="button" 
+                        onClick={() => setPaymentMethod('apple_pay')} 
+                        style={methodBtnStyle(paymentMethod === 'apple_pay')}>
+                         Pay
+                    </button>
+                </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════
+                AFRICA FLOW — Back button + active method indicator
+                (shown when user has picked a method and is on card_input)
+            ═══════════════════════════════════════════════════════════ */}
+            {isAfrica === true && step === 'card_input' && !isLoading && (
+                <div style={{ marginBottom: '16px' }}>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setStep('method_select');
+                            setPaymentMethod('');
+                            setErrorMsg('');
+                        }}
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                            border: 'none', background: '#f1f5f9', color: '#475569',
+                            fontSize: '12px', fontWeight: '600', padding: '6px 12px',
+                            borderRadius: '6px', cursor: 'pointer', marginBottom: '12px',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        ← Change Payment Method
+                    </button>
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        background: paymentMethod === 'mobile_money' ? '#fffbeb' : '#eff6ff',
+                        border: `1px solid ${paymentMethod === 'mobile_money' ? '#fbbf24' : '#93c5fd'}`,
+                        borderRadius: '8px', padding: '8px 14px'
+                    }}>
+                        <span style={{ fontSize: '16px' }}>{paymentMethod === 'mobile_money' ? '📱' : '💳'}</span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                            {paymentMethod === 'mobile_money' ? 'Mobile Money' : 'Card Payment'}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════
+                CARD INPUT FORM (shared for both Africa card + Non-Africa card)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 'card_input' && !isLoading && paymentMethod === 'card' && (
                 <form onSubmit={handleSubmitCard}>
                     <div className="form-group" style={{ marginBottom: '14px' }}>
@@ -353,99 +576,28 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                         </div>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: '20px' }}>
-                        <label className="form-label" style={{ color: '#475569' }}>Card PIN (Optional)</label>
-                        <input
-                            type="password"
-                            className="form-input"
-                            placeholder="Enter 4-digit PIN if required"
-                            maxLength="4"
-                            value={cardPin}
-                            onChange={(e) => setCardPin(e.target.value.replace(/\D/g, ''))}
-                            style={{ border: '1px solid #cbd5e1' }}
-                        />
-                        <span style={{ fontSize: '11px', color: '#94a3b8' }}>Required for GHS debit/credit cards.</span>
-                    </div>
+                    {/* Show PIN field for Africa users (GHS cards) */}
+                    {isAfrica && (
+                        <div className="form-group" style={{ marginBottom: '20px' }}>
+                            <label className="form-label" style={{ color: '#475569' }}>Card PIN (Optional)</label>
+                            <input
+                                type="password"
+                                className="form-input"
+                                placeholder="Enter 4-digit PIN if required"
+                                maxLength="4"
+                                value={cardPin}
+                                onChange={(e) => setCardPin(e.target.value.replace(/\D/g, ''))}
+                                style={{ border: '1px solid #cbd5e1' }}
+                            />
+                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>Required for GHS debit/credit cards.</span>
+                        </div>
+                    )}
 
                     <button type="submit" className="btn" style={{ background: '#2563eb', padding: '12px', fontWeight: '600' }}>
-                        Pay ${amount.toFixed(2)} (GHS {formattedAmountGhs})
-                    </button>
-                    
-                    {onCancel && (
-                        <button type="button" onClick={onCancel} style={{ width: '100%', border: 'none', background: 'none', color: '#64748b', fontSize: '13px', textDecoration: 'underline', marginTop: '12px', cursor: 'pointer' }}>
-                            Cancel
-                        </button>
-                    )}
-                </form>
-            )}
-
-            {/* Step 1: Bank Transfer Inputs */}
-            {step === 'card_input' && !isLoading && paymentMethod === 'bank' && (
-                <form onSubmit={async (e) => {
-                    e.preventDefault();
-                    setErrorMsg('');
-                    if (!bankName || !accountNumber) {
-                        setErrorMsg('Please enter your bank name and account number.');
-                        return;
-                    }
-                    setIsLoading(true);
-                    setLoadingText('Connecting to bank...');
-                    try {
-                        const response = await fetch('/.netlify/functions/paystack-charge', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                action: 'charge_bank', bankName, accountNumber, email, amountInUsd: amount, type
-                            })
-                        });
-                        const data = await response.json();
-                        setIsLoading(false);
-                        if (data.status) {
-                            onSuccess('bank_' + Date.now());
-                        } else {
-                            setErrorMsg(data.message || 'Bank transfer failed. Please verify details.');
+                        {isAfrica
+                            ? `Pay $${amount.toFixed(2)} (GHS ${formattedAmountGhs})`
+                            : `Pay $${amount.toFixed(2)}`
                         }
-                    } catch (err) {
-                        setIsLoading(false);
-                        setErrorMsg('Connection error. Failed to process bank transfer.');
-                    }
-                }}>
-                    <div className="form-group" style={{ marginBottom: '14px' }}>
-                        <label className="form-label" style={{ color: '#475569' }}>Bank Name</label>
-                        <select 
-                            className="form-input" 
-                            value={bankName} 
-                            onChange={(e) => setBankName(e.target.value)} 
-                            required 
-                            style={{ border: '1px solid #cbd5e1', appearance: 'auto' }}>
-                            <option value="">Select your bank</option>
-                            <option value="Ecobank Ghana">Ecobank Ghana</option>
-                            <option value="GCB Bank">GCB Bank</option>
-                            <option value="Stanbic Bank">Stanbic Bank</option>
-                            <option value="Absa Bank">Absa Bank</option>
-                            <option value="GTBank">GTBank</option>
-                            <option value="Zenith Bank">Zenith Bank</option>
-                            <option value="Fidelity Bank">Fidelity Bank</option>
-                            <option value="Access Bank">Access Bank</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group" style={{ marginBottom: '20px' }}>
-                        <label className="form-label" style={{ color: '#475569' }}>Account Number</label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            placeholder="Enter your account number"
-                            value={accountNumber}
-                            onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
-                            required
-                            style={{ border: '1px solid #cbd5e1' }}
-                        />
-                    </div>
-
-                    <button type="submit" className="btn" style={{ background: '#2563eb', padding: '12px', fontWeight: '600' }}>
-                        Pay ${amount.toFixed(2)} (GHS {formattedAmountGhs})
                     </button>
                     
                     {onCancel && (
@@ -456,7 +608,9 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 </form>
             )}
 
-            {/* Step 1: Mobile Money Inputs */}
+            {/* ═══════════════════════════════════════════════════════════
+                MOBILE MONEY FORM (Africa only, processed by Paystack)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 'card_input' && !isLoading && paymentMethod === 'mobile_money' && (
                 <form onSubmit={async (e) => {
                     e.preventDefault();
@@ -543,7 +697,7 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                         />
                     </div>
 
-                    <button type="submit" className="btn" style={{ background: '#2563eb', padding: '12px', fontWeight: '600' }}>
+                    <button type="submit" className="btn" style={{ background: '#f59e0b', color: '#1e293b', padding: '12px', fontWeight: '600' }}>
                         Pay ${amount.toFixed(2)} (GHS {formattedAmountGhs})
                     </button>
                     
@@ -555,11 +709,92 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 </form>
             )}
 
-            {/* Step 1: Apple Pay Input */}
+            {/* ═══════════════════════════════════════════════════════════
+                BANK TRANSFER FORM (Non-Africa only)
+            ═══════════════════════════════════════════════════════════ */}
+            {step === 'card_input' && !isLoading && paymentMethod === 'bank' && (
+                <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    setErrorMsg('');
+                    if (!bankName || !accountNumber) {
+                        setErrorMsg('Please enter your bank name and account number.');
+                        return;
+                    }
+                    setIsLoading(true);
+                    setLoadingText('Connecting to bank...');
+                    try {
+                        const response = await fetch('/.netlify/functions/paystack-charge', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'charge_bank', bankName, accountNumber, email, amountInUsd: amount, type
+                            })
+                        });
+                        const data = await response.json();
+                        setIsLoading(false);
+                        if (data.status) {
+                            onSuccess('bank_' + Date.now());
+                        } else {
+                            setErrorMsg(data.message || 'Bank transfer failed. Please verify details.');
+                        }
+                    } catch (err) {
+                        setIsLoading(false);
+                        setErrorMsg('Connection error. Failed to process bank transfer.');
+                    }
+                }}>
+                    <div className="form-group" style={{ marginBottom: '14px' }}>
+                        <label className="form-label" style={{ color: '#475569' }}>Bank Name</label>
+                        <select 
+                            className="form-input" 
+                            value={bankName} 
+                            onChange={(e) => setBankName(e.target.value)} 
+                            required 
+                            style={{ border: '1px solid #cbd5e1', appearance: 'auto' }}>
+                            <option value="">Select your bank</option>
+                            <option value="Ecobank Ghana">Ecobank Ghana</option>
+                            <option value="GCB Bank">GCB Bank</option>
+                            <option value="Stanbic Bank">Stanbic Bank</option>
+                            <option value="Absa Bank">Absa Bank</option>
+                            <option value="GTBank">GTBank</option>
+                            <option value="Zenith Bank">Zenith Bank</option>
+                            <option value="Fidelity Bank">Fidelity Bank</option>
+                            <option value="Access Bank">Access Bank</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: '20px' }}>
+                        <label className="form-label" style={{ color: '#475569' }}>Account Number</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Enter your account number"
+                            value={accountNumber}
+                            onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+                            required
+                            style={{ border: '1px solid #cbd5e1' }}
+                        />
+                    </div>
+
+                    <button type="submit" className="btn" style={{ background: '#2563eb', padding: '12px', fontWeight: '600' }}>
+                        Pay ${amount.toFixed(2)}
+                    </button>
+                    
+                    {onCancel && (
+                        <button type="button" onClick={onCancel} style={{ width: '100%', border: 'none', background: 'none', color: '#64748b', fontSize: '13px', textDecoration: 'underline', marginTop: '12px', cursor: 'pointer' }}>
+                            Cancel
+                        </button>
+                    )}
+                </form>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════
+                APPLE PAY (Non-Africa only)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 'card_input' && !isLoading && paymentMethod === 'apple_pay' && (
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1', marginBottom: '20px' }}>
-                        <div style={{ fontSize: '40px', marginBottom: '10px' }}></div>
+                        <div style={{ fontSize: '40px', marginBottom: '10px' }}></div>
                         <h4 style={{ fontSize: '16px', margin: '0 0 8px 0', color: '#1e293b' }}>Apple Pay</h4>
                         <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Fast, secure, and private checkout using Apple Pay.</p>
                     </div>
@@ -591,7 +826,7 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                         }}
                         className="btn" 
                         style={{ background: '#000000', color: '#ffffff', padding: '12px', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                        <span></span> Pay ${amount.toFixed(2)}
+                        <span></span> Pay ${amount.toFixed(2)}
                     </button>
 
                     {onCancel && (
@@ -602,7 +837,9 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 </div>
             )}
 
-            {/* Step 2: OTP Challenge input */}
+            {/* ═══════════════════════════════════════════════════════════
+                OTP CHALLENGE (shared)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 'otp_challenge' && !isLoading && (
                 <form onSubmit={handleSubmitOtp}>
                     <div style={{ textAlign: 'center', marginBottom: '18px' }}>
@@ -629,7 +866,9 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 </form>
             )}
 
-            {/* Step 3: PIN Challenge input */}
+            {/* ═══════════════════════════════════════════════════════════
+                PIN CHALLENGE (shared)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 'pin_challenge' && !isLoading && (
                 <form onSubmit={handleSubmitPinChallenge}>
                     <div style={{ textAlign: 'center', marginBottom: '18px' }}>
@@ -657,7 +896,9 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                 </form>
             )}
 
-            {/* Step: 3DS open_url challenge */}
+            {/* ═══════════════════════════════════════════════════════════
+                3DS OPEN URL CHALLENGE (shared)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 'open_url_challenge' && !isLoading && (
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '40px', marginBottom: '12px' }}>🏦</div>
@@ -674,7 +915,38 @@ const PaymentForm = ({ amount, email, type, onSuccess, onCancel }) => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => onSuccess(reference)}
+                        onClick={async () => {
+                            setErrorMsg('');
+                            setIsLoading(true);
+                            setLoadingText('Verifying payment status...');
+                            const maxAttempts = 60; // poll for up to 5 minutes
+                            const delayMs = 5000;   // every 5 seconds
+                            try {
+                                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                                    const response = await fetch(`/.netlify/functions/paystack-verify?reference=${reference}`);
+                                    const data = await response.json();
+                                    if (data.status === 'success') {
+                                        setIsLoading(false);
+                                        onSuccess(reference);
+                                        return;
+                                    } else if (data.status === 'ongoing' || data.status === 'pending') {
+                                        setLoadingText(`Payment still processing... checking again (${attempt}/${maxAttempts})`);
+                                        await new Promise(r => setTimeout(r, delayMs));
+                                    } else {
+                                        // failed, abandoned, insufficient funds, etc.
+                                        setIsLoading(false);
+                                        setErrorMsg('Payment failed. Your bank declined the transaction or your balance is insufficient. Please try again or use a different card.');
+                                        return;
+                                    }
+                                }
+                                // exhausted all attempts
+                                setIsLoading(false);
+                                setErrorMsg('Payment verification timed out. The transaction is still pending — please try again in a moment or contact your bank.');
+                            } catch (err) {
+                                setIsLoading(false);
+                                setErrorMsg('Unable to verify payment. Please check your connection and try again.');
+                            }
+                        }}
                         className="btn"
                         style={{ background: '#16a34a', padding: '12px', fontWeight: '600' }}
                     >
