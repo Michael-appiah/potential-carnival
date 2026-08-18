@@ -1,32 +1,26 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { CodeProvider } from './CodeContext';
-import Home from './pages/Home';
-import Recharge from './pages/Recharge';
-import Clearance from './pages/Clearance';
-import Verify from './pages/Verify';
-import Admin from './pages/Admin';
-import Logs from './pages/Logs';
-import UsersAdmin from './pages/UsersAdmin';
-import RedeemCard from './pages/RedeemCard';
-import './App.css';
+import { AuthProvider } from './AuthContext';
+import Landing    from './pages/Landing';
+import Login      from './pages/Login';
+import Signup     from './pages/Signup';
+import Dashboard  from './pages/Dashboard';
+import CardView   from './pages/CardView';
+import AuthGuard  from './components/AuthGuard';
 
 function App() {
   return (
-    <CodeProvider>
+    <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/store" element={<Recharge />} />
-          <Route path="/purchase/auth" element={<Clearance />} />
-          <Route path="/purchase/verification" element={<RedeemCard />} />
-          <Route path="/verify" element={<Verify />} />
-          <Route path="/users/secure/admin" element={<Admin />} />
-          <Route path="/ll/lt/yk/logs" element={<Logs />} />
-          <Route path="/users/admin" element={<UsersAdmin />} />
+          <Route path="/"                element={<Landing />} />
+          <Route path="/login"           element={<Login />} />
+          <Route path="/signup"          element={<Signup />} />
+          <Route path="/dashboard"       element={<AuthGuard><Dashboard /></AuthGuard>} />
+          <Route path="/card/:username"  element={<CardView />} />
         </Routes>
       </Router>
-    </CodeProvider>
+    </AuthProvider>
   );
 }
 
