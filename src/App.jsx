@@ -16,7 +16,6 @@ function App() {
           <Route path="/login"           element={<Login />} />
           <Route path="/signup"          element={<Signup />} />
           <Route path="/dashboard"       element={<AuthGuard><Dashboard /></AuthGuard>} />
-          <Route path="/card/:username"  element={<CardView />} />
         </Routes>
       </Router>
     </AuthProvider>

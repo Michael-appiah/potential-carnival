@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { useAuth } from '../AuthContext';
-import CardPreview from '../components/CardPreview';
-
 const EMPTY_CARD = {
   name: '', title: '', company: '', email: '',
   phone: '', whatsapp: '', website: '', linkedin: '',
@@ -194,34 +192,6 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* ── Preview panel ─────────────────── */}
-          <div>
-            <div className="glass preview-panel">
-              <div className="preview-label">Live Preview</div>
-              <CardPreview card={card} />
-
-              {/* QR Code */}
-              <div className="qr-box">
-                <div className="qr-label">Your QR Code</div>
-                {qrDataUrl
-                  ? <img src={qrDataUrl} alt="QR Code" className="qr-image" width={200} height={200} />
-                  : (
-                    <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 13 }}>
-                      Save your card to see QR code
-                    </div>
-                  )
-                }
-                <div className="qr-url">{cardUrl}</div>
-                <button
-                  className="btn btn-outline-accent"
-                  style={{ width: '100%', marginTop: 12, fontSize: 13 }}
-                  onClick={copyLink}
-                >
-                  Copy Link
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
