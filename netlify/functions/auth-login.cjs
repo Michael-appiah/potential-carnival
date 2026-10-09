@@ -31,8 +31,10 @@ exports.handler = async (event) => {
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Email and password are required' }) };
         }
 
-        const cleanEmail = email.toLowerCase().trim();
+        const identifier = email.toLowerCase().trim();
         const userStore = getStore({ name: 'nc-users' });
+        const usernameRecord = await userStore.get(`username:${identifier}`, { type: 'json' }).catch(() => null);
+        const cleanEmail = usernameRecord?.email || identifier;
         const user = await userStore.get(`email:${cleanEmail}`, { type: 'json' }).catch(() => null);
 
         if (!user) {

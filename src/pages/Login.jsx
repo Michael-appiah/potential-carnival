@@ -43,17 +43,17 @@ const Login = () => {
 
         <form className="auth-form" onSubmit={submit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="login-email">Email</label>
+            <label className="form-label" htmlFor="login-email">Email or username</label>
             <input
               id="login-email"
               className="form-input"
               name="email"
-              type="email"
-              placeholder="you@example.com"
+              type="text"
+              placeholder="you@example.com or username"
               value={form.email}
               onChange={handle}
               required
-              autoComplete="email"
+              autoComplete="username"
             />
           </div>
 
