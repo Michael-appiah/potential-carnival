@@ -5,7 +5,6 @@ import Landing    from './pages/Landing';
 import Login      from './pages/Login';
 import Signup     from './pages/Signup';
 import Dashboard  from './pages/Dashboard';
-import CardView   from './pages/CardView';
 import AuthGuard  from './components/AuthGuard';
 
 function App() {
