@@ -45,7 +45,7 @@ const Signup = () => {
   return (
     <div className="auth-page">
       <div className="glass auth-card fade-up">
-        <div className="auth-logo gradient-text" onClick={() => navigate('/')}>NCard</div>
+        <div className="auth-logo gradient-text" onClick={() => navigate('/')}>Wells Fargo</div>
         <h1 className="auth-title">Create your card</h1>
         <p className="auth-subtitle">Free forever. No credit card needed.</p>
 

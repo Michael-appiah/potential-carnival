@@ -19,7 +19,7 @@ const Landing = () => {
     <div className="landing-bg">
       {/* Navbar */}
       <nav className="navbar">
-        <div className="navbar-brand gradient-text">NCard</div>
+        <div className="navbar-brand gradient-text">Wells Fargo</div>
         <div className="navbar-actions">
           {user ? (
             <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>
@@ -97,7 +97,7 @@ const Landing = () => {
           </button>
         </div>
 
-        <div className="landing-footer">© 2026 NCard — Share smarter.</div>
+        <div className="landing-footer">© 2026 Wells Fargo — Share smarter.</div>
       </div>
     </div>
   );

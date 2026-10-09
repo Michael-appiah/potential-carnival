@@ -35,7 +35,7 @@ const Login = () => {
   return (
     <div className="auth-page">
       <div className="glass auth-card fade-up">
-        <div className="auth-logo gradient-text" onClick={() => navigate('/')}>NCard</div>
+        <div className="auth-logo gradient-text" onClick={() => navigate('/')}>Wells Fargo</div>
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-subtitle">Log in to manage your digital card</p>
 
