@@ -99,7 +99,7 @@ const Dashboard = () => {
       {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-brand gradient-text" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-          NCard
+          Wells Fargo
         </div>
         <div className="navbar-actions">
           <button className="btn btn-ghost" onClick={() => window.open(cardUrl, '_blank', 'noopener')}>

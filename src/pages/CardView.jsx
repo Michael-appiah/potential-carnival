@@ -21,9 +21,9 @@ const CardView = () => {
 
   /* Update page title */
   useEffect(() => {
-    if (card) document.title = `${card.name} — Digital Card | NCard`;
-    else document.title = 'NCard';
-    return () => { document.title = 'NCard'; };
+    if (card) document.title = `${card.name} — Digital Card | Wells Fargo`;
+    else document.title = 'Wells Fargo';
+    return () => { document.title = 'Wells Fargo'; };
   }, [card]);
 
   if (loading) {
@@ -119,7 +119,7 @@ const CardView = () => {
             className="pub-card-footer-brand gradient-text"
             onClick={() => navigate('/')}
           >
-            NCard
+            Wells Fargo
           </span>
         </div>
       </div>
